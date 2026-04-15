@@ -554,6 +554,11 @@
 
     .topbar-toggle {
       display: none; /* Hidden on desktop */
+      padding-right: 12px;
+      margin-right: 4px;
+      border-right: 1px solid var(--line-strong);
+      height: 24px;
+      align-items: center;
     }
 
     .title-stack {
@@ -598,6 +603,7 @@
 
     .topbar-actions {
       display: flex;
+      align-items: center; /* This centers them vertically */
       gap: 8px;
     }
 
@@ -1268,9 +1274,12 @@
     </aside>
 
     <main class="main">
-      <header class="topbar">
-        <div style="display: flex; align-items: center; gap: 12px;">
+     <header class="topbar">
+        <div style="display: flex; align-items: center;">
           <button class="toggle-button topbar-toggle" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
+          <div style="width: 12px;"></div> ```
+
+*(Note: I removed the `gap: 12px` from the inline style because the `padding` and `margin` we added to the `.topbar-toggle` class now handle that spacing more precisely with the line in the middle.)*
           <div class="title-stack">
             <h1 id="conversationTitle">New chat</h1>
             <div class="mode-dropdown topbar-mode" data-mode-dropdown>
