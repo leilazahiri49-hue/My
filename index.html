@@ -552,6 +552,10 @@
       z-index: 20;
     }
 
+    .topbar-toggle {
+      display: none; /* Hidden on desktop */
+    }
+
     .title-stack {
       display: flex;
       flex-direction: column;
@@ -934,24 +938,32 @@
         padding: 12px;
         border-radius: 18px;
         gap: 12px;
-        transition:
-          width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-          padding 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateX(0);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .sidebar.collapsed {
-        width: 58px;
-        padding: 8px;
-        overflow: hidden;
+        transform: translateX(-120%);
+        width: min(250px, calc(100vw - 96px)); /* Keeps width so text doesn't squash */
+        padding: 12px;
+        overflow: visible;
       }
+
+      /* Force contents to stay visible while sliding off */
+      .sidebar.collapsed .brand { opacity: 1; transform: translateY(-50%) translateX(0); }
+      .sidebar.collapsed .brand-text, .sidebar.collapsed .new-chat-text, .sidebar.collapsed .chat-copy { width: auto; opacity: 1; }
+      .sidebar.collapsed .new-chat { width: auto; padding: 0 14px; gap: 12px; justify-content: flex-start; }
+      .sidebar.collapsed .chat-item { width: 100%; height: auto; padding: 10px 12px; justify-content: flex-start; gap: 12px; }
+      .sidebar.collapsed .chat-item .chat-icon { width: 36px; height: 36px; font-size: 0.86rem; }
+      .sidebar.collapsed .section-label { opacity: 1; max-height: 20px; }
 
       .sidebar-header,
       .sidebar.collapsed .sidebar-header {
         min-height: 40px;
       }
 
-      .sidebar.collapsed .sidebar-header {
-        justify-content: center;
+      .topbar-toggle {
+        display: grid; /* Show the ☰ button in the main chat on mobile */
       }
 
       .new-chat:hover {
@@ -968,7 +980,7 @@
         min-height: 0;
         min-width: 0;
         border-radius: 18px;
-        margin-left: 66px;
+        margin-left: 0; /* Chat now takes up the full width */
       }
 
       .topbar {
@@ -1095,12 +1107,13 @@
       }
 
       .sidebar.collapsed {
-        width: 54px;
-        padding: 7px;
+        transform: translateX(-120%);
+        width: min(238px, calc(100vw - 82px));
+        padding: 10px;
       }
 
       .main {
-        margin-left: 60px;
+        margin-left: 0; /* Chat takes full width */
       }
 
       .brand {
@@ -1256,18 +1269,21 @@
 
     <main class="main">
       <header class="topbar">
-        <div class="title-stack">
-          <h1 id="conversationTitle">New chat</h1>
-          <div class="mode-dropdown topbar-mode" data-mode-dropdown>
-            <button class="mode-trigger" type="button" data-mode-trigger aria-haspopup="listbox" aria-expanded="false">
-              <span class="mode-label" data-mode-label>Minimal AI</span>
-              <span class="mode-chevron"></span>
-            </button>
-            <div class="mode-menu" role="listbox">
-              <button class="mode-option active" type="button" data-mode-option data-value="Minimal AI" role="option" aria-selected="true">Minimal AI</button>
-              <button class="mode-option" type="button" data-mode-option data-value="Creative AI" role="option" aria-selected="false">Creative AI</button>
-              <button class="mode-option" type="button" data-mode-option data-value="Coding AI" role="option" aria-selected="false">Coding AI</button>
-              <button class="mode-option" type="button" data-mode-option data-value="Study AI" role="option" aria-selected="false">Study AI</button>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button class="toggle-button topbar-toggle" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
+          <div class="title-stack">
+            <h1 id="conversationTitle">New chat</h1>
+            <div class="mode-dropdown topbar-mode" data-mode-dropdown>
+              <button class="mode-trigger" type="button" data-mode-trigger aria-haspopup="listbox" aria-expanded="false">
+                <span class="mode-label" data-mode-label>Minimal AI</span>
+                <span class="mode-chevron"></span>
+              </button>
+              <div class="mode-menu" role="listbox">
+                 <button class="mode-option active" type="button" data-mode-option data-value="Minimal AI" role="option" aria-selected="true">Minimal AI</button>
+                <button class="mode-option" type="button" data-mode-option data-value="Creative AI" role="option" aria-selected="false">Creative AI</button>
+                <button class="mode-option" type="button" data-mode-option data-value="Coding AI" role="option" aria-selected="false">Coding AI</button>
+                <button class="mode-option" type="button" data-mode-option data-value="Study AI" role="option" aria-selected="false">Study AI</button>
+              </div>
             </div>
           </div>
         </div>
