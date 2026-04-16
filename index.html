@@ -568,6 +568,8 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
+      justify-content: center;
+      gap: 2px;
       min-width: 0;
       flex: 1 1 auto;
       overflow: hidden;
@@ -584,7 +586,8 @@
     }
 
     .topbar-mode {
-      margin-top: 6px;
+      margin-top: 0;
+      flex: 0 0 auto;
     }
 
     .topbar-mode .mode-trigger {
@@ -613,8 +616,139 @@
 
     .topbar-actions {
       display: flex;
+      align-items: center;
+      justify-content: center;
       flex: 0 0 auto;
-      gap: 8px;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      height: 40px;
+      width: 40px;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .search-container.active {
+      width: 220px;
+      border-radius: 20px;
+    }
+
+    .search-container .icon-button {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  background: transparent;
+  border: none;
+
+  display: flex;              /* change this */
+  align-items: center;        /* vertical center */
+  justify-content: center;    /* horizontal center */
+
+  padding: 0;
+  margin: 0;
+
+  
+  line-height: 1;
+
+
+}
+    .search-input {
+      flex: 1;
+      min-width: 0;
+      width: 0; /* Prevents the hidden input from pushing the icon */
+      opacity: 0;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: opacity 0.2s ease;
+      padding: 0;
+    }
+
+    .search-container.active .search-input {
+      opacity: 1;
+      padding: 0 12px;
+      width: auto;
+    }
+
+    @media (max-width: 640px) {
+      .search-container.active {
+        width: 160px; /* Slightly smaller expansion on phones */
+      }
+    }
+
+    .search-highlight {
+      background-color: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 3px;
+      padding: 0 2px;
+      transition: all 0.2s;
+    }
+
+    .search-highlight.active-match {
+      background-color: var(--accent);
+      color: #08111a;
+      box-shadow: 0 0 8px var(--accent-soft);
+    }
+
+    /* Better visibility for highlights inside user text bubbles */
+    .message-row.user .search-highlight {
+      background-color: rgba(0, 0, 0, 0.25);
+      color: #fff;
+    }
+
+    .message-row.user .search-highlight.active-match {
+      background-color: #fff;
+      color: #000;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+    }
+
+    .search-navigator {
+      position: absolute;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(15, 22, 36, 0.98);
+      border: 1px solid var(--line-strong);
+      border-radius: 24px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow);
+    }
+
+    .search-navigator.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .search-count {
+      font-size: 0.9rem;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .nav-btn {
+      width: 28px;
+      height: 28px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .icon-button {
@@ -1324,10 +1458,24 @@
         </div>
 
         <div class="topbar-actions">
-          <button class="icon-button" type="button" aria-label="Search">⌕</button>
-          <button class="icon-button" type="button" aria-label="More">⋯</button>
+          <div class="search-container" id="searchContainer">
+            <button class="icon-button" type="button" id="searchToggleBtn" aria-label="Search">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+    <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2"/>
+  </svg>
+</button>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search chat..." autocomplete="off">
+            <button class="icon-button close-search" type="button" id="searchCloseBtn" aria-label="Close search" style="display: none; font-size: 14px;">✕</button>
+          </div>
         </div>
       </header>
+
+      <div class="search-navigator" id="searchNavigator">
+        <button class="icon-button nav-btn" id="searchPrevBtn" aria-label="Previous match">↑</button>
+        <span class="search-count" id="searchCount">0 / 0</span>
+        <button class="icon-button nav-btn" id="searchNextBtn" aria-label="Next match">↓</button>
+      </div>
 
       <section class="messages" id="messages"></section>
 
@@ -1473,6 +1621,11 @@
     }
 
     function setActiveChat(nextIndex) {
+      // Close search if it's open when changing chats
+      if (typeof closeSearch === 'function') {
+        closeSearch();
+      }
+
       chatButtons.forEach((button) => {
         const isActive = Number(button.dataset.chatIndex) === nextIndex;
         button.classList.toggle("active", isActive);
@@ -1672,10 +1825,175 @@
     
     mobileOverlay.addEventListener("click", collapseMobileSidebar);
 
+// --- Search Functionality Logic ---
+    let searchMatches = [];
+    let currentMatchIndex = -1;
+
+    const searchToggleBtn = document.getElementById('searchToggleBtn');
+    const searchInput = document.getElementById('searchInput');
+    const searchCloseBtn = document.getElementById('searchCloseBtn');
+    const searchContainer = document.getElementById('searchContainer');
+    const searchNavigator = document.getElementById('searchNavigator');
+    const searchCount = document.getElementById('searchCount');
+    const searchPrevBtn = document.getElementById('searchPrevBtn');
+    const searchNextBtn = document.getElementById('searchNextBtn');
+    const messagesContainer = document.getElementById('messages');
+
+    searchToggleBtn.addEventListener('click', () => {
+      searchContainer.classList.add('active');
+      searchInput.focus();
+      searchToggleBtn.style.display = 'none';
+      searchCloseBtn.style.display = 'flex';
+    });
+
+    searchCloseBtn.addEventListener('click', closeSearch);
+
+    function closeSearch() {
+      searchContainer.classList.remove('active');
+      searchInput.value = '';
+      searchToggleBtn.style.display = 'flex';
+      searchCloseBtn.style.display = 'none';
+      clearHighlights();
+      hideNavigator();
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const keyword = e.target.value.trim();
+      if (keyword.length < 2) {
+        clearHighlights();
+        hideNavigator();
+        return;
+      }
+      performSearch(keyword);
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        searchNextBtn.click();
+      } else if (e.key === 'Escape') {
+        closeSearch();
+      }
+    });
+
+    function performSearch(keyword) {
+      clearHighlights();
+      if (!keyword) return;
+
+      const walker = document.createTreeWalker(
+        messagesContainer,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: function(node) {
+            if (node.parentNode.nodeName === 'SCRIPT' || 
+                node.parentNode.nodeName === 'STYLE' || 
+                node.parentNode.classList.contains('search-highlight')) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        }
+      );
+
+      const nodesToReplace = [];
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.nodeValue.toLowerCase().includes(keyword.toLowerCase())) {
+          nodesToReplace.push(node);
+        }
+      }
+
+      searchMatches = [];
+      
+      nodesToReplace.forEach(textNode => {
+        const text = textNode.nodeValue;
+        const regex = new RegExp(`(${escapeRegExp(keyword)})`, 'gi');
+        const fragment = document.createDocumentFragment();
+        
+        let lastIndex = 0;
+        text.replace(regex, (match, p1, offset) => {
+          fragment.appendChild(document.createTextNode(text.slice(lastIndex, offset)));
+          
+          const mark = document.createElement('mark');
+          mark.className = 'search-highlight';
+          mark.textContent = match;
+          fragment.appendChild(mark);
+          searchMatches.push(mark);
+          
+          lastIndex = offset + match.length;
+        });
+        
+        fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+        textNode.parentNode.replaceChild(fragment, textNode);
+      });
+
+      if (searchMatches.length > 0) {
+        currentMatchIndex = 0;
+        updateSearchNavigator();
+        highlightCurrentMatch();
+      } else {
+        hideNavigator();
+      }
+    }
+
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function clearHighlights() {
+      const marks = messagesContainer.querySelectorAll('mark.search-highlight');
+      marks.forEach(mark => {
+        const parent = mark.parentNode;
+        if (parent) {
+          parent.replaceChild(document.createTextNode(mark.textContent), mark);
+          parent.normalize();
+        }
+      });
+      searchMatches = [];
+      currentMatchIndex = -1;
+    }
+
+    function updateSearchNavigator() {
+      if (searchMatches.length > 0) {
+        searchNavigator.classList.add('visible');
+        searchCount.textContent = `${currentMatchIndex + 1} / ${searchMatches.length}`;
+      } else {
+        hideNavigator();
+      }
+    }
+
+    function hideNavigator() {
+      searchNavigator.classList.remove('visible');
+    }
+
+    function highlightCurrentMatch() {
+      searchMatches.forEach(mark => mark.classList.remove('active-match'));
+      if (searchMatches[currentMatchIndex]) {
+        const currentMark = searchMatches[currentMatchIndex];
+        currentMark.classList.add('active-match');
+        currentMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    searchPrevBtn.addEventListener('click', () => {
+      if (searchMatches.length === 0) return;
+      currentMatchIndex = (currentMatchIndex - 1 + searchMatches.length) % searchMatches.length;
+      updateSearchNavigator();
+      highlightCurrentMatch();
+    });
+
+    searchNextBtn.addEventListener('click', () => {
+      if (searchMatches.length === 0) return;
+      currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length;
+      updateSearchNavigator();
+      highlightCurrentMatch();
+    });
+
+    // Initialize the app down here so all search variables exist first!
     setActiveChat(-1);
     syncMode(currentMode, false);
     syncSidebarToViewport();
     renderStartScreen();
-  </script>
+</script>
 </body>
 </html>
