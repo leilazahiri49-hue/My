@@ -556,13 +556,28 @@
       display: none; /* Hidden on desktop */
     }
 
+    .topbar-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
     .title-stack {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
+      min-width: 0;
+      flex: 1 1 auto;
+      overflow: hidden;
     }
 
     .topbar h1 {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       font-size: clamp(1.45rem, 3vw, 2rem);
       font-weight: 700;
       letter-spacing: -0.03em;
@@ -598,6 +613,7 @@
 
     .topbar-actions {
       display: flex;
+      flex: 0 0 auto;
       gap: 8px;
     }
 
@@ -966,6 +982,10 @@
         display: grid; /* Show the ☰ button in the main chat on mobile */
       }
 
+      .topbar-title-row {
+        gap: 20px;
+      }
+
       .new-chat:hover {
         transform: none;
       }
@@ -990,6 +1010,14 @@
 
       .topbar h1 {
         font-size: clamp(1.25rem, 6vw, 1.7rem);
+      }
+
+      .topbar h1.title-tight {
+        font-size: 1.35rem;
+      }
+
+      .topbar h1.title-tiny {
+        font-size: 1.18rem;
       }
 
       .topbar-actions {
@@ -1143,6 +1171,10 @@
         padding: 10px;
       }
 
+      .topbar-title-row {
+        gap: 18px;
+      }
+
       .topbar-mode .mode-trigger {
         min-width: 112px;
       }
@@ -1182,21 +1214,24 @@
       }
 
       .start-panel {
-        gap: 8px;
+        gap: 0;
       }
 
       .start-mark {
-        width: 38px;
-        height: 38px;
-        font-size: 0.86rem;
+        display: none;
       }
 
       .start-panel h2 {
-        font-size: clamp(1.45rem, 9vw, 2.1rem);
+        font-size: 2rem;
+        white-space: nowrap;
       }
 
       .start-panel p {
-        font-size: 0.78rem;
+        display: none;
+      }
+
+      .starter-grid {
+        display: none;
       }
 
       .starter-prompt {
@@ -1269,7 +1304,7 @@
 
     <main class="main">
       <header class="topbar">
-        <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="topbar-title-row">
           <button class="toggle-button topbar-toggle" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
           <div class="title-stack">
             <h1 id="conversationTitle">New chat</h1>
@@ -1482,6 +1517,23 @@
       });
     }
 
+    function fitConversationTitle() {
+      conversationTitle.classList.remove("title-tight", "title-tiny");
+
+      if (!mobileQuery.matches) return;
+
+      requestAnimationFrame(() => {
+        if (conversationTitle.scrollWidth <= conversationTitle.clientWidth) return;
+
+        conversationTitle.classList.add("title-tight");
+
+        requestAnimationFrame(() => {
+          if (conversationTitle.scrollWidth <= conversationTitle.clientWidth) return;
+          conversationTitle.classList.add("title-tiny");
+        });
+      });
+    }
+
     function collapseMobileSidebar() {
       if (!mobileQuery.matches) return;
 
@@ -1499,16 +1551,20 @@
         sidebar.classList.remove("collapsed");
         mobileOverlay.classList.remove("active");
       }
+
+      fitConversationTitle();
     }
 
     function renderStartScreen() {
       conversationTitle.textContent = "New chat";
+      fitConversationTitle();
       messages.classList.add("start-mode");
       messages.innerHTML = startScreenMarkup;
     }
 
     function renderConversation(nextIndex) {
       conversationTitle.textContent = conversations[nextIndex].title;
+      fitConversationTitle();
       messages.classList.remove("start-mode");
       messages.innerHTML = `
         <div class="date-label">Today</div>
@@ -1611,6 +1667,8 @@
     } else {
       mobileQuery.addListener(syncSidebarToViewport);
     }
+
+    window.addEventListener("resize", fitConversationTitle);
     
     mobileOverlay.addEventListener("click", collapseMobileSidebar);
 
