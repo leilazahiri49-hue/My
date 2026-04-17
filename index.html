@@ -882,18 +882,6 @@
       text-align: center;
     }
 
-    .start-mark {
-      width: 48px;
-      height: 48px;
-      display: grid;
-      place-items: center;
-      justify-self: center;
-      border-radius: 16px;
-      color: #08111a;
-      font-weight: 800;
-      background: linear-gradient(135deg, #7ae6ff, #4aa8ff);
-    }
-
     .start-panel h2 {
       font-size: clamp(1.9rem, 4.5vw, 3.15rem);
       line-height: 1.05;
@@ -1217,12 +1205,6 @@
         gap: 10px;
       }
 
-      .start-mark {
-        width: 42px;
-        height: 42px;
-        border-radius: 14px;
-      }
-
       .start-panel h2 {
         font-size: clamp(1.7rem, 8vw, 2.45rem);
       }
@@ -1351,21 +1333,9 @@
         gap: 0;
       }
 
-      .start-mark {
-        display: none;
-      }
-
       .start-panel h2 {
         font-size: 2rem;
         white-space: nowrap;
-      }
-
-      .start-panel p {
-        display: none;
-      }
-
-      .starter-grid {
-        display: none;
       }
 
       .starter-prompt {
@@ -1373,7 +1343,35 @@
         padding: 8px 10px;
         font-size: 0.8rem;
       }
-    }
+.} /* This closes your mobile media query */
+
+/* --- 3D Rotating Text Animation --- */
+.rotating-text {
+  display: inline-block;
+  transform-origin: 50% 50% -15px; 
+  transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.5s ease;
+  transform-style: preserve-3d;
+}
+
+.rotating-text.roll-out {
+  transform: perspective(600px) rotateX(90deg);
+  opacity: 0;
+}
+
+.rotating-text.roll-in {
+  animation: rollInEffect 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+@keyframes rollInEffect {
+  0% {
+    transform: perspective(600px) rotateX(-90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(600px) rotateX(0deg);
+    opacity: 1;
+  }
+}
   </style>
 </head>
 <body>
@@ -1594,21 +1592,16 @@
     const startScreenMarkup = `
       <div class="start-screen">
         <div class="start-panel">
-          <div class="start-mark">AI</div>
           <div>
             <h2>Start with a spark.</h2>
-<br>
-<p>when you feel like no one is there for you we always are </p>
-          </div>
-          <div class="starter-grid">
-            <button class="starter-prompt" type="button">Polish this interface</button>
-            <button class="starter-prompt" type="button">Write a better prompt</button>
-            <button class="starter-prompt" type="button">Plan my next feature</button>
+            <br>
+            <p id="rotatingText" class="rotating-text">
+              when you feel like no one is there for you we always are
+            </p>
           </div>
         </div>
       </div>
     `;
-
     function createMessage(message) {
       return `
         <div class="message-row ${message.who === "user" ? "user" : ""}">
@@ -1714,6 +1707,7 @@
       fitConversationTitle();
       messages.classList.add("start-mode");
       messages.innerHTML = startScreenMarkup;
+      setTimeout(startRotatingText, 300);
     }
 
     function renderConversation(nextIndex) {
@@ -1995,6 +1989,41 @@
     syncMode(currentMode, false);
     syncSidebarToViewport();
     renderStartScreen();
+const rotatingMessages = [
+  "when you feel like no one is there for you we always are",
+  "you're not alone, even when it feels like it",
+  "someone will always listen — start typing",
+  "you don’t have to figure everything out by yourself",
+  "we’re here, whenever you need it"
+];
+
+let rotateIndex = 0;
+let rotateInterval;
+
+function startRotatingText() {
+  const el = document.getElementById("rotatingText");
+  if (!el) return;
+
+  // Clear previous interval (important when switching chats)
+  clearInterval(rotateInterval);
+
+  rotateInterval = setInterval(() => {
+    el.classList.add("roll-out");
+
+    setTimeout(() => {
+      rotateIndex = (rotateIndex + 1) % rotatingMessages.length;
+      el.textContent = rotatingMessages[rotateIndex];
+
+      el.classList.remove("roll-out");
+      el.classList.add("roll-in");
+
+      setTimeout(() => {
+        el.classList.remove("roll-in");
+      }, 600);
+
+    }, 600); // matches animation
+  }, 8000); // 7–10 seconds vibe
+}
 </script>
 </body>
 </html>
