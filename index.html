@@ -412,8 +412,11 @@
     }
 
     .sidebar-section {
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: 10px;
+      flex: 1; /* Tells it to take up remaining vertical space */
+      min-height: 0; /* Crucial rule to allow scrolling inside flexbox */
     }
 
     .section-label {
@@ -434,12 +437,32 @@
     }
 
     .chat-list {
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: 6px;
+      overflow-y: auto;
+      overflow-x: hidden; /* FIX: Kills the horizontal scrollbar */
+      padding-right: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(143, 160, 189, 0.45) transparent;
+    }
+
+    /* Optional: Custom scrollbar styling for the sidebar to match the main chat */
+    .chat-list::-webkit-scrollbar {
+      width: 4px;
+    }
+    .chat-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat-list::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: rgba(143, 160, 189, 0.42);
     }
 
     .sidebar.collapsed .chat-list {
-      justify-items: center;
+      align-items: center; /* FIX: Centers items perfectly in flexbox */
+      padding-right: 0;    /* FIX: Removes scrollbar padding so icons stay centered */
+      overflow-x: hidden;
     }
 
     .chat-item {
@@ -465,29 +488,30 @@
 
     .sidebar.collapsed .chat-item {
       justify-content: center;
+      align-items: center;
       width: var(--compact-size);
       height: var(--compact-size);
       min-height: var(--compact-size);
       margin: 0 auto;
       padding: 0;
       gap: 0;
-      align-self: center;
+      background: transparent;
+      border-color: transparent;
       border-radius: var(--compact-radius);
-      transition:
-        width 0.18s ease,
-        height 0.18s ease,
-        min-height 0.18s ease,
-        background 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.18s ease;
+      transition: transform 0.18s ease;
+    }
+
+    .sidebar.collapsed .chat-copy {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
     }
 
     .sidebar.collapsed .chat-item.active,
     .sidebar.collapsed .chat-item:hover {
-      width: 44px;
-      height: 44px;
-      min-height: 44px;
-      transform: translateY(-1px);
+      background: transparent;
+      border-color: transparent;
     }
 
     .chat-icon {
@@ -500,26 +524,33 @@
       color: var(--accent);
       background: var(--accent-soft);
       font-size: 0.86rem;
+      transition: transform 0.2s ease, filter 0.2s ease, width 0.18s ease, height 0.18s ease;
     }
 
     .sidebar.collapsed .chat-item .chat-icon {
-      width: 30px;
-      height: 30px;
-      font-size: 0.78rem;
-      transition: width 0.18s ease, height 0.18s ease, font-size 0.18s ease;
+      width: 38px; 
+      height: 38px;
+      font-size: 0.9rem;
     }
 
     .sidebar.collapsed .chat-item.active .chat-icon,
     .sidebar.collapsed .chat-item:hover .chat-icon {
-      width: 34px;
-      height: 34px;
-      font-size: 0.84rem;
+      transform: translateY(-1px) scale(1.05); 
+      filter: brightness(1.15);
+    }
+
+    .chat-copy {
+      min-width: 0; /* Prevents the text from stretching the parent box */
+      flex: 1;
     }
 
     .chat-copy strong {
       display: block;
       font-size: 0.9rem;
       font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis; /* Adds the ... */
+      white-space: nowrap;
     }
 
     .chat-copy span {
@@ -527,6 +558,9 @@
       margin-top: 2px;
       color: var(--muted);
       font-size: 0.8rem;
+      overflow: hidden;
+      text-overflow: ellipsis; /* Adds the ... */
+      white-space: nowrap;
     }
 
     .main {
@@ -952,8 +986,15 @@
     }
 
     .bubble-wrap {
-      display: grid;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
       gap: 6px;
+      min-width: 0;
+    }
+
+    .message-row.user .bubble-wrap {
+      align-items: flex-end;
     }
 
     .bubble {
@@ -1089,7 +1130,7 @@
 
       /* Force contents to stay visible while sliding off */
       .sidebar.collapsed .brand { opacity: 1; transform: translateY(-50%) translateX(0); }
-      .sidebar.collapsed .brand-text, .sidebar.collapsed .new-chat-text, .sidebar.collapsed .chat-copy { width: auto; opacity: 1; }
+      .sidebar.collapsed .brand-text, .sidebar.collapsed .new-chat-text, .sidebar.collapsed .chat-copy { width: auto; opacity: 1; position: relative; visibility: visible; }
       .sidebar.collapsed .new-chat { width: auto; padding: 0 14px; gap: 12px; justify-content: flex-start; }
       .sidebar.collapsed .chat-item { width: 100%; height: auto; padding: 10px 12px; justify-content: flex-start; gap: 12px; }
       .sidebar.collapsed .chat-item .chat-icon { width: 36px; height: 36px; font-size: 0.86rem; }
@@ -1585,9 +1626,10 @@
     const modeDropdowns = document.querySelectorAll("[data-mode-dropdown]");
     const modeLabels = document.querySelectorAll("[data-mode-label]");
     const modeOptions = document.querySelectorAll("[data-mode-option]");
-    let currentChatIndex = -1;
+   let currentChatIndex = -1;
     let isSwitching = false;
     let currentMode = "Minimal AI";
+    let startScreenDraft = "";
 
     const startScreenMarkup = `
       <div class="start-screen">
@@ -1608,7 +1650,7 @@
           <div class="avatar ${message.who === "user" ? "user" : "bot"}">${message.name}</div>
           <div class="bubble-wrap">
             <div class="bubble">${message.text}</div>
-            <div class="meta">${message.meta}</div>
+            <div class="meta" ${message.id ? `id="${message.id}"` : ''}>${message.meta}</div>
           </div>
         </div>
       `;
@@ -1620,7 +1662,10 @@
         closeSearch();
       }
 
-      chatButtons.forEach((button) => {
+      // FIX: Dynamically query the buttons so we don't try to highlight deleted HTML
+      const currentChatButtons = document.querySelectorAll(".chat-item[data-chat-index]");
+
+      currentChatButtons.forEach((button) => {
         const isActive = Number(button.dataset.chatIndex) === nextIndex;
         button.classList.toggle("active", isActive);
         button.setAttribute("aria-pressed", String(isActive));
@@ -1739,19 +1784,47 @@
       }, { once: true });
     }
 
+    function saveDraft() {
+      const val = document.querySelector(".composer-row input").value;
+      if (currentChatIndex === -1) {
+        startScreenDraft = val;
+      } else if (conversations[currentChatIndex]) {
+        conversations[currentChatIndex].draft = val;
+      }
+    }
+
+    function loadDraft(index) {
+      const input = document.querySelector(".composer-row input");
+      if (index === -1) {
+        input.value = startScreenDraft || "";
+      } else if (conversations[index]) {
+        input.value = conversations[index].draft || "";
+      }
+    }
+
     function switchChat(nextIndex) {
       if (isSwitching) return;
       if (nextIndex === currentChatIndex) return;
 
+      saveDraft();
+
       const enterClass = nextIndex > currentChatIndex ? "enter-from-bottom" : "enter-from-top";
       animateTo(nextIndex, enterClass, () => renderConversation(nextIndex));
+      
+      loadDraft(nextIndex);
+      document.querySelector(".composer-row input").focus();
     }
 
     function showNewChat() {
       if (isSwitching) return;
       if (currentChatIndex === -1) return;
 
+      saveDraft();
+
       animateTo(-1, "enter-from-top", renderStartScreen);
+      
+      loadDraft(-1);
+      document.querySelector(".composer-row input").focus();
     }
 
     chatButtons.forEach((button) => {
@@ -2023,7 +2096,173 @@ function startRotatingText() {
 
     }, 600); // matches animation
   }, 8000); // 7–10 seconds vibe
+
+} // <-- This closes your startRotatingText function!
+
+// --- Dynamic Sidebar Rendering ---
+function renderSidebarList() {
+  const chatList = document.querySelector(".chat-list");
+  
+  // Re-build the sidebar HTML based on the conversations array
+  chatList.innerHTML = conversations.map((conv, index) => `
+    <button class="chat-item ${index === currentChatIndex ? 'active' : ''}" type="button" data-chat-index="${index}" aria-pressed="${index === currentChatIndex}">
+      <span class="chat-icon">✦</span>
+      <span class="chat-copy">
+        <strong>${conv.title}</strong>
+        <span>${conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].text.substring(0, 25) + '...' : 'New chat'}</span>
+      </span>
+    </button>
+  `).join("");
+
+  // Re-bind click events to the new buttons
+  const newChatButtons = document.querySelectorAll(".chat-item[data-chat-index]");
+  newChatButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      switchChat(Number(button.dataset.chatIndex));
+      collapseMobileSidebar();
+    });
+  });
 }
+
+// --- Chat Interaction Logic ---
+const chatInput = document.querySelector(".composer-row input");
+const sendBtn = document.querySelector(".send-button");
+
+function appendMessage(messageObj) {
+  if (messages.classList.contains("start-mode")) {
+    clearInterval(rotateInterval);
+    messages.classList.remove("start-mode");
+    messages.innerHTML = '<div class="date-label">Today</div>';
+  }
+  messages.insertAdjacentHTML("beforeend", createMessage(messageObj));
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function handleSendMessage() {
+  const text = chatInput.value.trim();
+  if (!text) return; 
+
+  chatInput.value = ""; 
+
+  if (currentChatIndex === -1) {
+    startScreenDraft = "";
+  } else {
+    conversations[currentChatIndex].draft = "";
+  }
+
+  // --- NEW: Grab the current real time ---
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+  // --- NEW: Create unique IDs for the timestamps ---
+  const userMsgId = "msg-user-" + Date.now();
+  const botMsgId = "msg-bot-" + Date.now();
+
+  // Create the objects, storing both "Just now" and the "Real Time"
+  const userMsg = { 
+    who: "user", 
+    name: "You", 
+    text: text, 
+    meta: "You • Just now", 
+    id: userMsgId,
+    realTime: `You • ${timeStr}`
+  };
+  
+  const botMsg = { 
+    who: "bot", 
+    name: "AI", 
+    text: "AI has not been integrated into me yet", 
+    meta: "AI • Just now", 
+    id: botMsgId,
+    realTime: `AI • ${timeStr}`
+  };
+
+  // Check if this is a brand new chat (Start screen)
+  if (currentChatIndex === -1) {
+    // Grab the first 5 words for the title
+    const words = text.split(/\s+/);
+    const generatedTitle = words.slice(0, 5).join(" ") + (words.length > 5 ? "..." : "");
+
+    // Create the new conversation object
+    const newConv = {
+      title: generatedTitle,
+      messages: []
+    };
+
+    // Add it to the top of our array
+    conversations.unshift(newConv);
+    currentChatIndex = 0;
+    
+    // Update the UI
+    renderSidebarList();
+    setActiveChat(currentChatIndex);
+    conversationTitle.textContent = generatedTitle;
+    fitConversationTitle();
+  } else {
+    // If it's an existing chat, move it to the top of the list!
+    if (currentChatIndex > 0) {
+      const activeConv = conversations.splice(currentChatIndex, 1)[0];
+      conversations.unshift(activeConv);
+      currentChatIndex = 0; 
+    }
+  }
+
+  // 1. Show and save the user's message
+  appendMessage(userMsg);
+  conversations[currentChatIndex].messages.push(userMsg);
+  
+  // Re-render sidebar immediately to show user text preview and new order
+  renderSidebarList(); 
+
+  // --- NEW: 60-Second Timer for User Message ---
+  setTimeout(() => {
+    userMsg.meta = userMsg.realTime; // Update data layer
+    const el = document.getElementById(userMsgId);
+    if (el) el.textContent = userMsg.realTime; // Update visual layer
+  }, 60000); 
+
+  // 2. Show and save the bot's response after a delay
+  setTimeout(() => {
+    appendMessage(botMsg);
+    conversations[currentChatIndex].messages.push(botMsg);
+    
+    // Re-render sidebar again to show bot text preview
+    renderSidebarList(); 
+
+    // --- NEW: 60-Second Timer for Bot Message ---
+    setTimeout(() => {
+      botMsg.meta = botMsg.realTime; // Update data layer
+      const el = document.getElementById(botMsgId);
+      if (el) el.textContent = botMsg.realTime; // Update visual layer
+    }, 60000); 
+
+  }, 600);
+}
+
+// --- Event Listeners & Window Focus ---
+
+// 1. Send message when clicking the arrow button
+sendBtn.addEventListener("click", handleSendMessage);
+
+// 2. Send message when pressing the "Enter" key
+chatInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault(); // Prevents the browser from trying to submit a form
+    handleSendMessage();
+  }
+});
+
+// 3. Focus the input immediately when the page loads
+chatInput.focus();
+
+// 4. Focus the input whenever you switch tabs and come back to the website
+window.addEventListener("focus", () => {
+  // A tiny delay ensures the browser has fully rendered the tab before focusing
+  setTimeout(() => {
+    chatInput.focus();
+  }, 50); 
+});
+
 </script>
 </body>
 </html>
