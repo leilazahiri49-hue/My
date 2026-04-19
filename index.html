@@ -1517,22 +1517,92 @@
 
 .mcq-option {
   width: 100%;
-  padding: 14px 20px; /* Reduced vertical padding */
+  padding: 14px 20px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--line);
-  border-radius: 12px; /* Slightly sharper corners */
+  border-radius: 12px;
   color: var(--text);
-  font-size: 0.92rem; /* Subtly smaller text */
+  font-size: 0.92rem;
   font-weight: 500;
   text-align: left;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
 }
 
 .mcq-option:hover {
   background: rgba(84, 210, 255, 0.08);
   border-color: rgba(84, 210, 255, 0.3);
   transform: translateY(-2px);
+}
+
+/* --- Multi-Select Checkbox Styles --- */
+.mcq-option.selected {
+  background: rgba(84, 210, 255, 0.12);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.mcq-check {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: width 0.3s ease, opacity 0.3s ease, margin-right 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.mcq-option.selected .mcq-check {
+  width: 22px; /* Slightly wider to fit the box cleanly */
+  opacity: 1;
+  margin-right: 12px;
+}
+
+/* The actual box design with a perfect SVG checkmark */
+.mcq-custom-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background-color: var(--accent);
+  /* Razor-sharp embedded SVG vector checkmark */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2308111a' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-size: 14px;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 10px rgba(84, 210, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.mcq-text {
+  flex: 1;
+  transition: transform 0.3s ease;
+}
+
+.mcq-continue-btn {
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #7ae6ff, #4aa8ff);
+  color: #08111a;
+  border: none;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 12px;
+  opacity: 0.4;
+  pointer-events: none; /* Disabled until an option is picked */
+}
+
+.mcq-continue-btn.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mcq-continue-btn.active:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
 }
 
 /* --- Slider & Dynamic Question Styles --- */
@@ -1682,19 +1752,17 @@
 /* --- Mobile Fixes for Modal Overflow --- */
 @media (max-width: 640px) {
   .modal-box {
-    padding: 24px 20px 20px 20px; /* Thinner padding on mobile */
+    padding: 56px 20px 20px 20px; /* Restored the thick top padding to clear the buttons! */
     width: 92%;
     border-radius: 20px;
   }
   
   .question-container {
-    /* Shrink the negative margin trick to fit mobile padding */
     margin-right: -12px; 
     padding-right: 12px;
   }
   
   .mcq-option {
-    /* Slightly tighter buttons so they don't feel cramped */
     padding: 14px 16px; 
     font-size: 0.9rem;
   }
@@ -1705,14 +1773,14 @@
   }
   
   .skip-btn {
-    top: 14px;
-    right: 18px;
+    top: 18px; /* Pulled slightly down for perfect alignment */
+    right: 16px; /* Pushed slightly closer to the edge */
     font-size: 0.75rem;
   }
   
   .back-btn {
-    top: 14px;
-    left: 18px;
+    top: 18px; /* Pulled slightly down for perfect alignment */
+    left: 16px; /* Pushed slightly closer to the edge */
     font-size: 0.75rem;
   }
 }
@@ -2820,7 +2888,7 @@ document.getElementById('mainSkipBtn').addEventListener('click', () => {
 function renderQuestion(questionId) {
   currentQId = questionId; // Save the ID we are currently on
   const q = questionBank[questionId];
-  
+
   // NEW: Show or hide the Back button based on history
   const backBtn = document.getElementById('backBtn');
   if (backBtn) {
@@ -2831,29 +2899,77 @@ function renderQuestion(questionId) {
   optionsContainer.style.opacity = 0;
 
   setTimeout(() => {
+    // --- NEW: Reset Scroll to Top SAFELY before rendering ---
+    const qContainer = document.getElementById('questionContainer');
+    if (qContainer) qContainer.scrollTop = 0;
+
     questionText.textContent = q.question;
     optionsContainer.innerHTML = "";
     
     if (q.type === "mcq") {
+      let currentSelectedOptions = []; // Tracks multiple selections
+      
       q.options.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'mcq-option';
         btn.type = 'button';
-        btn.textContent = opt.text;
+        // Wrap the text and inject the new custom checkbox div
+        btn.innerHTML = `<span class="mcq-check"><div class="mcq-custom-checkbox"></div></span><span class="mcq-text">${opt.text}</span>`;
         
         btn.onclick = () => {
-          // Push current state to history BEFORE moving forward
-          historyStack.push({ id: currentQId, trait: opt.trait });
-          userTraits.push(opt.trait);
+          const index = currentSelectedOptions.findIndex(o => o.trait === opt.trait);
           
-          if (opt.nextId) {
-            renderQuestion(opt.nextId);
+          if (index > -1) {
+            // If already checked, uncheck it
+            currentSelectedOptions.splice(index, 1);
+            btn.classList.remove('selected');
           } else {
-            finishOnboarding();
+            // Check it
+            currentSelectedOptions.push(opt);
+            btn.classList.add('selected');
+          }
+          
+          // Enable the Continue button if at least 1 option is checked
+          const continueBtn = document.getElementById('mcqContinueBtn');
+          if (continueBtn) {
+            if (currentSelectedOptions.length > 0) continueBtn.classList.add('active');
+            else continueBtn.classList.remove('active');
           }
         };
         optionsContainer.appendChild(btn);
       });
+
+      // Add the specific Continue button for the MCQ mode
+      const continueBtn = document.createElement('button');
+      continueBtn.id = 'mcqContinueBtn';
+      continueBtn.className = 'mcq-continue-btn';
+      continueBtn.type = 'button';
+      continueBtn.textContent = 'Continue';
+      
+      continueBtn.onclick = () => {
+        if (currentSelectedOptions.length === 0) return;
+        
+        // Grab all selected traits
+        const traitsToPush = currentSelectedOptions.map(o => o.trait);
+        
+        // Push the entire array of traits to history so the Back button can delete all of them
+        historyStack.push({ id: currentQId, traits: traitsToPush });
+        userTraits.push(...traitsToPush); // Spreads the array and pushes them all
+        
+        // Determine where to go next. (If they picked a mix, we prioritize the safest 'nextId' or just the first one)
+        let nextId = currentSelectedOptions[0].nextId; 
+        currentSelectedOptions.forEach(o => {
+          if (o.nextId === null) nextId = null; // 'null' always forces the questionnaire to finish
+          else if (o.nextId === "q_mindset") nextId = "q_mindset"; // Prioritize skipping ahead if they picked an extreme option
+        });
+
+        if (nextId) {
+          renderQuestion(nextId);
+        } else {
+          finishOnboarding();
+        }
+      };
+      optionsContainer.appendChild(continueBtn);
 
     } else if (q.type === "slider") {
       optionsContainer.innerHTML = `
@@ -2878,7 +2994,7 @@ function renderQuestion(questionId) {
         const ageTrait = `age_${userAge}`;
         
         // Push current state to history BEFORE moving forward
-        historyStack.push({ id: currentQId, trait: ageTrait });
+        historyStack.push({ id: currentQId, traits: [ageTrait] });
         userTraits.push(ageTrait); 
         
         const nextId = q.getNextId(userAge);
@@ -3077,14 +3193,16 @@ document.getElementById('backBtn').addEventListener('click', () => {
     skipBtn.style.opacity = 1;
   }
 
-  // 2. Get the last state they were in
+ // 2. Get the last state they were in
   const lastState = historyStack.pop();
   
-  // 3. Erase the trait they selected from that state
-  const traitIndex = userTraits.lastIndexOf(lastState.trait);
-  if (traitIndex > -1) {
-    userTraits.splice(traitIndex, 1);
-  }
+  // 3. Erase ALL traits they selected in that specific state
+  lastState.traits.forEach(traitToRemove => {
+    const traitIndex = userTraits.lastIndexOf(traitToRemove);
+    if (traitIndex > -1) {
+      userTraits.splice(traitIndex, 1);
+    }
+  });
   
   // 4. Rewind time and render that previous question again
   renderQuestion(lastState.id);
