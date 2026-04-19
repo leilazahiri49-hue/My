@@ -1599,6 +1599,38 @@
   transform: translateY(-2px);
   filter: brightness(1.1);
 }
+
+/* --- Mobile Fixes for Modal Overflow --- */
+@media (max-width: 640px) {
+  .modal-box {
+    padding: 24px 20px 20px 20px; /* Thinner padding on mobile */
+    width: 92%;
+    border-radius: 20px;
+  }
+  
+  .question-container {
+    /* Shrink the negative margin trick to fit mobile padding */
+    margin-right: -12px; 
+    padding-right: 12px;
+  }
+  
+  .mcq-option {
+    /* Slightly tighter buttons so they don't feel cramped */
+    padding: 14px 16px; 
+    font-size: 0.9rem;
+  }
+  
+  #questionText {
+    font-size: 1.05rem;
+    margin-bottom: 20px;
+  }
+  
+  .skip-btn {
+    top: 14px;
+    right: 18px;
+    font-size: 0.75rem;
+  }
+}
   </style>
 </head>
 <body>
