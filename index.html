@@ -1439,7 +1439,7 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 24px;
-  padding: 36px 36px 24px 36px;
+  padding: 56px 36px 24px 36px; /* Pushed the top padding down from 36 to 56 */
   width: 90%;
   max-width: 520px;
   max-height: 85vh;
@@ -1456,28 +1456,30 @@
   transform: translateY(0) scale(1);
 }
 
-.skip-btn {
+.skip-btn, .back-btn {
   position: absolute;
-  top: 20px;
-  right: 24px;
+  top: 24px;
   background: transparent;
   border: none;
-  color: var(--muted);
+  color: var(--muted); /* Both buttons now share this calm grey color */
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
-.skip-btn:hover {
-  color: var(--text);
+.skip-btn { right: 28px; }
+.back-btn { left: 28px; }
+
+.skip-btn:hover, .back-btn:hover {
+  color: var(--text); /* Both turn bright white when hovered */
   text-decoration: underline;
 }
 
-.modal-header { margin-bottom: 28px; }
-.modal-icon { margin: 0 auto 16px; width: 48px; height: 48px; font-size: 1.1rem; }
-.modal-header h2 { font-size: 1.5rem; margin-bottom: 6px; }
+.modal-header { margin-bottom: 32px; }
+.modal-header h2 { font-size: 1.5rem; margin-bottom: 8px; }
 .modal-header p { color: var(--muted); font-size: 0.85rem; }
+
 .question-container {
   min-height: 220px;
   display: flex;
@@ -1515,12 +1517,12 @@
 
 .mcq-option {
   width: 100%;
-  padding: 16px 20px;
+  padding: 14px 20px; /* Reduced vertical padding */
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 12px; /* Slightly sharper corners */
   color: var(--text);
-  font-size: 0.95rem;
+  font-size: 0.92rem; /* Subtly smaller text */
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -1600,6 +1602,83 @@
   filter: brightness(1.1);
 }
 
+/* --- Results Screen Styles --- */
+.result-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: modeLabelChange 0.5s ease forwards; /* Reusing your slick fade-in animation! */
+}
+
+.result-container h3 {
+  font-size: 1.2rem;
+  color: var(--text);
+}
+
+.result-badge {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 18px 32px;
+  border-radius: 20px;
+  border: 1px solid rgba(84, 210, 255, 0.3);
+  margin: 10px 0;
+  box-shadow: 0 10px 30px rgba(84, 210, 255, 0.1);
+}
+
+.result-description {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 400px;
+  margin-bottom: 16px;
+}
+
+/* --- Start Screen Styles --- */
+.start-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: modeLabelChange 0.3s ease forwards;
+}
+
+.start-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 16px;
+}
+
+.safety-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.inline-skip-btn {
+  background: transparent;
+  border: none;
+  color: #ff5a5a; /* Changed to Warning Red */
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 0;
+}
+
+.inline-skip-btn:hover {
+  color: #ff8282; /* Lighter red on hover */
+  text-decoration: underline;
+}
+
 /* --- Mobile Fixes for Modal Overflow --- */
 @media (max-width: 640px) {
   .modal-box {
@@ -1630,24 +1709,50 @@
     right: 18px;
     font-size: 0.75rem;
   }
+  
+  .back-btn {
+    top: 14px;
+    left: 18px;
+    font-size: 0.75rem;
+  }
 }
   </style>
 </head>
 <body>
   <div id="onboardingModal" class="modal-overlay active">
     <div class="modal-box">
+      <button id="backBtn" class="back-btn" type="button" style="display: none;">← Back</button>
       <button id="skipBtn" class="skip-btn" type="button">Skip straight to chat</button>
       
-      <div class="modal-header">
-        <div class="brand-mark modal-icon">AI</div>
-        <h2>Let's personalize your space</h2>
-        <p>Your answers are strictly private and never shared.</p>
+      <div id="startContainer" class="start-container">
+        <div class="modal-header" style="margin-bottom: 24px;">
+          <h2>Let's personalize your space</h2>
+          <p>Your answers are strictly private and never shared.</p>
+        </div>
+
+        <div class="start-actions">
+          <button id="beginBtn" class="next-btn" type="button">Start</button>
+          
+          <div class="safety-row">
+            <span>If in serious distress, please</span>
+            <button id="mainSkipBtn" class="inline-skip-btn" type="button">skip straight to chat</button>
+          </div>
+        </div>
       </div>
 
-      <div id="questionContainer" class="question-container">
+      <div id="questionContainer" class="question-container" style="display: none;">
         <h3 id="questionText">Loading...</h3>
+    
         <div id="optionsContainer" class="options-grid"></div>
       </div>
+
+      <div id="resultContainer" class="result-container" style="display: none;">
+        <h3>Your Custom Space is Ready</h3>
+        <div id="resultBadge" class="result-badge">Loading...</div>
+        <p id="resultDescription" class="result-description">Setting up your profile...</p>
+        <button id="startChatBtn" class="next-btn" type="button">Enter Chat</button>
+      </div>
+
     </div>
   </div>
 
@@ -2685,13 +2790,42 @@ const questionBank = {
 let userTraits = [];
 let finalAIPersonality = "";
 let userAge = 0; 
+let historyStack = []; // NEW: Remembers the path they took
+let currentQId = "";   // NEW: Remembers the current question ID
 
 function startQuestionnaire() {
-  renderQuestion("q_age");
+  // Hide the top-right skip button initially so they focus on the start screen
+  document.getElementById('skipBtn').style.display = 'none';
+  
+  // Show Start Screen, hide Questions
+  document.getElementById('startContainer').style.display = 'flex';
+  document.getElementById('questionContainer').style.display = 'none';
 }
 
+document.getElementById('beginBtn').addEventListener('click', () => {
+  // Hide Start Screen, show Questions and top-right skip button
+  document.getElementById('startContainer').style.display = 'none';
+  document.getElementById('questionContainer').style.display = 'flex';
+  document.getElementById('skipBtn').style.display = 'block';
+  
+  renderQuestion("q_age");
+});
+
+document.getElementById('mainSkipBtn').addEventListener('click', () => {
+  finalAIPersonality = "emergency_crisis_listener"; 
+  console.log("Skipped from start screen. Assigned AI Personality:", finalAIPersonality);
+  closeModal();
+});
+
 function renderQuestion(questionId) {
+  currentQId = questionId; // Save the ID we are currently on
   const q = questionBank[questionId];
+  
+  // NEW: Show or hide the Back button based on history
+  const backBtn = document.getElementById('backBtn');
+  if (backBtn) {
+    backBtn.style.display = historyStack.length > 0 ? 'block' : 'none';
+  }
   
   questionText.style.opacity = 0;
   optionsContainer.style.opacity = 0;
@@ -2708,7 +2842,10 @@ function renderQuestion(questionId) {
         btn.textContent = opt.text;
         
         btn.onclick = () => {
+          // Push current state to history BEFORE moving forward
+          historyStack.push({ id: currentQId, trait: opt.trait });
           userTraits.push(opt.trait);
+          
           if (opt.nextId) {
             renderQuestion(opt.nextId);
           } else {
@@ -2738,7 +2875,11 @@ function renderQuestion(questionId) {
 
       nextBtn.addEventListener('click', () => {
         userAge = parseInt(slider.value);
-        userTraits.push(`age_${userAge}`); 
+        const ageTrait = `age_${userAge}`;
+        
+        // Push current state to history BEFORE moving forward
+        historyStack.push({ id: currentQId, trait: ageTrait });
+        userTraits.push(ageTrait); 
         
         const nextId = q.getNextId(userAge);
         renderQuestion(nextId);
@@ -2752,44 +2893,205 @@ function renderQuestion(questionId) {
   }, 200);
 }
 
-function finishOnboarding() {
-  const traits = userTraits.join(" ");
+// Map the internal personality IDs to user-facing titles and descriptions
+const personalityProfiles = {
+  "gentle_crisis_listener": { 
+    title: "The Safe Haven", 
+    desc: "Your space is configured to prioritize emotional safety. I am here to offer a gentle, non-judgmental environment with zero pressure." 
+  },
+  "direct_tough_love_coach": { 
+    title: "The Reality Check", 
+    desc: "Your space is configured to give it to you straight. We will focus on logic, accountability, and honest, direct feedback." 
+  },
+  "solution_oriented_mentor": { 
+    title: "The Strategist", 
+    desc: "Your space is configured for action. I am here to help you break down big problems into manageable, step-by-step plans." 
+  },
+  "burnout_recovery_guide": { 
+    title: "The Anchor", 
+    desc: "Your space is configured to help you slow down. I am here to help you manage overwhelm and find balance when you are pushing too hard." 
+  },
+  "empathetic_listener": { 
+    title: "The Empathetic Ear", 
+    desc: "Your space is configured for pure listening. I am here to validate your feelings and support you, without rushing to 'fix' things." 
+  },
+  "calming_grounding_assistant": { 
+    title: "The Grounding Force", 
+    desc: "Your space is configured to help soothe anxiety. I am here to offer calming perspectives and help you untangle overthinking." 
+  },
+  "supportive_guide": { 
+    title: "The Supportive Guide", 
+    desc: "Your space is configured to be a balanced companion. I am here to offer a mix of friendly support and practical guidance." 
+  }
+};
 
-  // Deep Psychological Hierarchy
+function finishOnboarding() {
+  // 1. Initialize the scoreboard
+  const scores = {
+    gentle_crisis_listener: 0,
+    direct_tough_love_coach: 0,
+    solution_oriented_mentor: 0,
+    burnout_recovery_guide: 0,
+    empathetic_listener: 0,
+    calming_grounding_assistant: 0,
+    supportive_guide: 1 // Base score tie-breaker
+  };
+
+  // 2. The AI Weighting Matrix
+  // Every trait adds specific points to specific profiles
+  const traitWeights = {
+    // Coping Mechanisms
+    "coping_isolate": { gentle_crisis_listener: 3, calming_grounding_assistant: 1 },
+    "coping_distract": { burnout_recovery_guide: 1, calming_grounding_assistant: 1 },
+    "coping_overwork": { burnout_recovery_guide: 4, solution_oriented_mentor: 1 },
+    "coping_anger": { calming_grounding_assistant: 3, gentle_crisis_listener: 1 },
+    
+    // Recharging
+    "recharge_introvert": { empathetic_listener: 2, gentle_crisis_listener: 1 },
+    "recharge_extrovert": { supportive_guide: 2 },
+    "recharge_active": { solution_oriented_mentor: 2, burnout_recovery_guide: 1 },
+    "recharge_passive": { gentle_crisis_listener: 2, burnout_recovery_guide: 2 },
+
+    // Decision Making
+    "decision_logical": { solution_oriented_mentor: 4, direct_tough_love_coach: 2 },
+    "decision_intuitive": { empathetic_listener: 2, supportive_guide: 2 },
+    "decision_collaborative": { supportive_guide: 3, empathetic_listener: 1 },
+    "decision_avoidant": { gentle_crisis_listener: 4, calming_grounding_assistant: 2 },
+
+    // Values
+    "value_honesty": { direct_tough_love_coach: 4, solution_oriented_mentor: 1 },
+    "value_loyalty": { supportive_guide: 2, empathetic_listener: 2 },
+    "value_empathy": { empathetic_listener: 4, gentle_crisis_listener: 2 },
+    "value_independence": { direct_tough_love_coach: 2, solution_oriented_mentor: 2 },
+
+    // Self Perception
+    "self_fixer": { solution_oriented_mentor: 3, direct_tough_love_coach: 1 },
+    "self_listener": { empathetic_listener: 3, gentle_crisis_listener: 1 },
+    "self_driven": { solution_oriented_mentor: 2, burnout_recovery_guide: 2 },
+    "self_guarded": { gentle_crisis_listener: 3, direct_tough_love_coach: 1 },
+
+    // Energy Levels
+    "energy_high_anxiety": { calming_grounding_assistant: 5, gentle_crisis_listener: 1 },
+    "energy_burnt_out": { burnout_recovery_guide: 5, empathetic_listener: 2 },
+    "energy_empty": { gentle_crisis_listener: 6, burnout_recovery_guide: 2 },
+
+    // Support Style
+    "support_solutions": { solution_oriented_mentor: 5, direct_tough_love_coach: 2 },
+    "support_validation": { empathetic_listener: 5, gentle_crisis_listener: 2 },
+    "support_tough_love": { direct_tough_love_coach: 6 },
+
+    // Final Mindset
+    "action_oriented": { solution_oriented_mentor: 4, direct_tough_love_coach: 2 },
+    "needs_venting": { empathetic_listener: 4, calming_grounding_assistant: 2 },
+    "crisis": { gentle_crisis_listener: 8 } // Immediate heavy weight for safety
+  };
+
+  // 3. Calculate scores based on the user's unique combination
+  userTraits.forEach(trait => {
+    // Add base weights
+    if (traitWeights[trait]) {
+      const weights = traitWeights[trait];
+      for (const persona in weights) {
+        scores[persona] += weights[persona];
+      }
+    }
+
+    // --- Complex Permutations (Combo Multipliers) ---
+    // If they are a high-pressure student AND they are burnt out
+    if ((trait === "jee_prep" || trait === "neet_prep") && userTraits.includes("energy_burnt_out")) {
+      scores.burnout_recovery_guide += 3;
+    }
+    // If they value blunt honesty AND asked for tough love
+    if (trait === "value_honesty" && userTraits.includes("support_tough_love")) {
+      scores.direct_tough_love_coach += 3;
+    }
+    // If they are highly avoidant AND their energy is empty
+    if (trait === "decision_avoidant" && userTraits.includes("energy_empty")) {
+      scores.gentle_crisis_listener += 4;
+    }
+  });
+
+  // 4. Determine the winner (The AI Logic step)
+  let highestScore = -1;
+  let winningPersona = "supportive_guide"; 
+
+  for (const persona in scores) {
+    if (scores[persona] > highestScore) {
+      highestScore = scores[persona];
+      winningPersona = persona;
+    }
+  }
+
+  finalAIPersonality = winningPersona;
+
+  // Log the math to the console so you can see exactly how the AI made its decision
+  console.log("Traits Collected:", userTraits);
+  console.log("Scoreboard Calculation:", scores);
+  console.log("Assigned AI Personality:", finalAIPersonality);
   
-  // 1. Extreme Crisis / Avoidant Guarded Profile
-  if (traits.includes("crisis") || traits.includes("energy_empty") || (traits.includes("decision_avoidant") && traits.includes("self_guarded"))) {
-    finalAIPersonality = "gentle_crisis_listener"; 
+  // Transition the UI from Questions to Results
+  showResultScreen();
+}
+
+function showResultScreen() {
+  // Grab the elements
+  const questionContainer = document.getElementById('questionContainer');
+  const resultContainer = document.getElementById('resultContainer');
+  const skipButton = document.getElementById('skipBtn');
+  
+  // Update the text based on their profile
+  const profile = personalityProfiles[finalAIPersonality];
+  document.getElementById('resultBadge').textContent = profile.title;
+  document.getElementById('resultDescription').textContent = profile.desc;
+
+  // Smoothly fade out the old content and fade in the new content
+  questionContainer.style.opacity = 0;
+  skipButton.style.opacity = 0;
+
+  setTimeout(() => {
+    questionContainer.style.display = 'none';
+    skipButton.style.display = 'none';
     
-  // 2. High Logic / Tough Love Profile
-  } else if (traits.includes("support_tough_love") || (traits.includes("decision_logical") && traits.includes("value_honesty"))) {
-    finalAIPersonality = "direct_tough_love_coach";
+    resultContainer.style.display = 'flex';
+  }, 200);
+}
+
+// --- NEW: Back Button Listener ---
+document.getElementById('backBtn').addEventListener('click', () => {
+  if (historyStack.length === 0) return; // Prevent going back from the very start
+  
+  // 1. If they are on the Results Screen, restore the Questions UI
+  const resultContainer = document.getElementById('resultContainer');
+  if (resultContainer.style.display === 'flex') {
+    resultContainer.style.display = 'none';
     
-  // 3. Driven / Fixer / Solution Profile (Academic or Career)
-  } else if ((traits.includes("jee_prep") || traits.includes("neet_prep") || traits.includes("career_focused") || traits.includes("self_driven") || traits.includes("self_fixer")) && traits.includes("support_solutions")) {
-    finalAIPersonality = "solution_oriented_mentor"; 
+    // Bring back the question container and skip button
+    const questionContainer = document.getElementById('questionContainer');
+    const skipBtn = document.getElementById('skipBtn');
     
-  // 4. Overworked / Burnout Profile
-  } else if (traits.includes("coping_overwork") && traits.includes("action_oriented")) {
-    finalAIPersonality = "burnout_recovery_guide";
+    questionContainer.style.display = 'flex';
+    skipBtn.style.display = 'block';
     
-  // 5. High Empathy / Validation Profile
-  } else if (traits.includes("needs_venting") || traits.includes("support_validation") || traits.includes("value_empathy") || traits.includes("self_listener")) {
-    finalAIPersonality = "empathetic_listener";
-    
-  // 6. High Anxiety / Grounding Profile
-  } else if (traits.includes("energy_high_anxiety")) {
-     finalAIPersonality = "calming_grounding_assistant";
-     
-  // 7. Default Safe Fallback
-  } else {
-    finalAIPersonality = "supportive_guide";
+    // Restore their opacity so they are fully visible
+    questionContainer.style.opacity = 1;
+    skipBtn.style.opacity = 1;
+  }
+
+  // 2. Get the last state they were in
+  const lastState = historyStack.pop();
+  
+  // 3. Erase the trait they selected from that state
+  const traitIndex = userTraits.lastIndexOf(lastState.trait);
+  if (traitIndex > -1) {
+    userTraits.splice(traitIndex, 1);
   }
   
-  console.log("Traits Collected:", userTraits);
-  console.log("Assigned AI Personality:", finalAIPersonality);
-  closeModal();
-}
+  // 4. Rewind time and render that previous question again
+  renderQuestion(lastState.id);
+});
+
+// Bind the new Start Chat button to actually close the modal
+document.getElementById('startChatBtn').addEventListener('click', closeModal);
 
 skipBtn.addEventListener('click', () => {
   finalAIPersonality = "emergency_crisis_listener"; 
