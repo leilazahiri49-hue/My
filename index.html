@@ -1413,9 +1413,212 @@
     opacity: 1;
   }
 }
+
+/* --- Modal Questionnaire Styles --- */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 15, 26, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 36px 36px 24px 36px;
+  width: 90%;
+  max-width: 520px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  position: relative;
+  transform: translateY(20px) scale(0.95);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay.active .modal-box {
+  transform: translateY(0) scale(1);
+}
+
+.skip-btn {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.skip-btn:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+.modal-header { margin-bottom: 28px; }
+.modal-icon { margin: 0 auto 16px; width: 48px; height: 48px; font-size: 1.1rem; }
+.modal-header h2 { font-size: 1.5rem; margin-bottom: 6px; }
+.modal-header p { color: var(--muted); font-size: 0.85rem; }
+.question-container {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; 
+  flex: 1; 
+  
+  /* The magic trick: Pushes the scrollbar to the absolute edge, then pushes the text back to the center */
+  margin-right: -32px; 
+  padding-right: 32px; 
+  
+  /* Firefox Support */
+  scrollbar-width: thin; 
+  scrollbar-color: rgba(143, 160, 189, 0.4) transparent;
+}
+
+/* Custom slick scrollbar for Chrome/Safari/Edge */
+.question-container::-webkit-scrollbar {
+  width: 6px;
+}
+.question-container::-webkit-scrollbar-track {
+  background: transparent;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+.question-container::-webkit-scrollbar-thumb {
+  background: rgba(143, 160, 189, 0.4);
+  border-radius: 10px;
+}
+.question-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(143, 160, 189, 0.7);
+}
+#questionText { font-size: 1.15rem; font-weight: 600; margin-bottom: 24px; line-height: 1.4; }
+.options-grid { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
+
+.mcq-option {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mcq-option:hover {
+  background: rgba(84, 210, 255, 0.08);
+  border-color: rgba(84, 210, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* --- Slider & Dynamic Question Styles --- */
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.slider-value-display {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 8px 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(84, 210, 255, 0.3);
+  min-width: 80px;
+  text-align: center;
+}
+
+.custom-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  transition: opacity .2s;
+}
+
+.custom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--text);
+  box-shadow: 0 0 10px rgba(84, 210, 255, 0.5);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.custom-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.next-btn {
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #7ae6ff, #4aa8ff);
+  color: #08111a;
+  border: none;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  margin-top: 10px;
+}
+
+.next-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
   </style>
 </head>
 <body>
+  <div id="onboardingModal" class="modal-overlay active">
+    <div class="modal-box">
+      <button id="skipBtn" class="skip-btn" type="button">Skip straight to chat</button>
+      
+      <div class="modal-header">
+        <div class="brand-mark modal-icon">AI</div>
+        <h2>Let's personalize your space</h2>
+        <p>Your answers are strictly private and never shared.</p>
+      </div>
+
+      <div id="questionContainer" class="question-container">
+        <h3 id="questionText">Loading...</h3>
+        <div id="optionsContainer" class="options-grid"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="app">
     <div class="mobile-overlay" id="mobileOverlay"></div>
     <aside class="sidebar" id="sidebar">
@@ -2262,6 +2465,317 @@ window.addEventListener("focus", () => {
     chatInput.focus();
   }, 50); 
 });
+
+// --- Modal Questionnaire Logic (Dynamic Branching) ---
+const modalOverlay = document.getElementById('onboardingModal');
+const questionText = document.getElementById('questionText');
+const optionsContainer = document.getElementById('optionsContainer');
+const skipBtn = document.getElementById('skipBtn');
+
+// The dynamic question bank. 
+// "nextId" determines the branching path. If nextId is null, the questionnaire ends.
+const questionBank = {
+  "q_age": {
+    type: "slider",
+    question: "First, how old are you?",
+    min: 10, 
+    max: 90, 
+    defaultVal: 16,
+    getNextId: (age) => {
+      if (age >= 10 && age <= 14) return "q_middle_school";
+      if (age >= 15 && age <= 18) return "q_high_school";
+      if (age >= 19 && age <= 24) return "q_young_adult";
+      if (age >= 25 && age <= 59) return "q_adult";
+      return "q_senior"; // 60+
+    }
+  },
+  "q_middle_school": {
+    type: "mcq",
+    question: "You're in the early years of school right now. What's taking up your focus?",
+    options: [
+      { text: "Just trying to keep up with regular classes", trait: "middle_school_regular", nextId: "q_coping_youth" },
+      { text: "Homework and upcoming unit tests", trait: "middle_school_tests", nextId: "q_coping_youth" },
+      { text: "Social life, friends, and fitting in", trait: "social_focus", nextId: "q_coping_youth" },
+      { text: "Hobbies, sports, or gaming", trait: "hobby_focus", nextId: "q_coping_youth" },
+      { text: "Honestly, everything just feels overwhelming", trait: "overwhelmed_early", nextId: "q_coping_youth" }
+    ]
+  },
+  "q_high_school": {
+    type: "mcq",
+    question: "These are crucial years. What are you specifically preparing for right now?",
+    options: [
+      { text: "10th Board Exams", trait: "10th_boards", nextId: "q_coping_youth" },
+      { text: "12th Board Exams", trait: "12th_boards", nextId: "q_coping_youth" },
+      { text: "JEE (Engineering)", trait: "jee_prep", nextId: "q_coping_youth" },
+      { text: "NEET (Medical)", trait: "neet_prep", nextId: "q_coping_youth" },
+      { text: "Other Competitive Exams (CLAT, NDA, CA etc.)", trait: "other_competitive", nextId: "q_coping_youth" },
+      { text: "Just regular school / None of these", trait: "regular_schooling", nextId: "q_coping_youth" }
+    ]
+  },
+  "q_young_adult": {
+    type: "mcq",
+    question: "You're in a big transition phase. What does your current life look like?",
+    options: [
+      { text: "In College / University full-time", trait: "college", nextId: "q_coping_adult" },
+      { text: "Taking a drop year / Prepping for exams", trait: "dropper_prep", nextId: "q_coping_adult" },
+      { text: "Working my first real job", trait: "early_career", nextId: "q_coping_adult" },
+      { text: "Looking for work / Interviewing", trait: "job_hunting", nextId: "q_coping_adult" },
+      { text: "Managing a household or family early", trait: "young_family", nextId: "q_coping_adult" },
+      { text: "Taking a gap year or figuring things out", trait: "gap_phase", nextId: "q_coping_adult" }
+    ]
+  },
+  "q_adult": {
+    type: "mcq",
+    question: "What occupies most of your time and mental space lately?",
+    options: [
+      { text: "Building my career and working", trait: "career_focused", nextId: "q_coping_adult" },
+      { text: "Balancing work and family life", trait: "work_family_balance", nextId: "q_coping_adult" },
+      { text: "Raising kids / Running the household", trait: "family_focused", nextId: "q_coping_adult" },
+      { text: "Dealing with personal relationships", trait: "relationship_focused", nextId: "q_coping_adult" },
+      { text: "Retired early / Financially independent", trait: "retired_early", nextId: "q_coping_adult" },
+      { text: "Honestly, I'm just surviving day by day", trait: "struggling", nextId: "q_coping_adult" }
+    ]
+  },
+  "q_senior": {
+    type: "mcq",
+    question: "What best describes your current lifestyle?",
+    options: [
+      { text: "Happily retired and taking it easy", trait: "retired_happy", nextId: "q_coping_senior" },
+      { text: "Retired, but feeling a bit lost or lonely", trait: "retired_lonely", nextId: "q_coping_senior" },
+      { text: "Still working, but slowing down", trait: "working_senior", nextId: "q_coping_senior" },
+      { text: "Focusing heavily on my health", trait: "health_senior", nextId: "q_coping_senior" }
+    ]
+  },
+  // --- AGE SPECIFIC COPING QUESTIONS (Now routing to 'q_recharge') ---
+  "q_coping_youth": {
+    type: "mcq",
+    question: "When school or life gets really heavy, what is your default reaction?",
+    options: [
+      { text: "I hide in my room and shut everyone out.", trait: "coping_isolate", nextId: "q_recharge" },
+      { text: "I distract myself (gaming, scrolling, YouTube).", trait: "coping_distract", nextId: "q_recharge" },
+      { text: "I study obsessively so I don't fail.", trait: "coping_overwork", nextId: "q_recharge" },
+      { text: "I lash out or get frustrated easily.", trait: "coping_anger", nextId: "q_recharge" }
+    ]
+  },
+  "q_coping_adult": {
+    type: "mcq",
+    question: "When things get really heavy, what is your default reaction?",
+    options: [
+      { text: "I isolate and shut down completely.", trait: "coping_isolate", nextId: "q_recharge" },
+      { text: "Mindless distraction (phone, TV, internet).", trait: "coping_distract", nextId: "q_recharge" },
+      { text: "I throw myself into work or tasks to ignore it.", trait: "coping_overwork", nextId: "q_recharge" },
+      { text: "I get irritable or easily frustrated with others.", trait: "coping_anger", nextId: "q_recharge" }
+    ]
+  },
+  "q_coping_senior": {
+    type: "mcq",
+    question: "When you are feeling overwhelmed or down, how do you usually react?",
+    options: [
+      { text: "I withdraw and keep to myself.", trait: "coping_isolate", nextId: "q_recharge" },
+      { text: "I just watch TV or listen to the radio.", trait: "coping_distract", nextId: "q_recharge" },
+      { text: "I try to stay constantly busy to not think about it.", trait: "coping_overwork", nextId: "q_recharge" },
+      { text: "I get easily frustrated with things around me.", trait: "coping_anger", nextId: "q_recharge" }
+    ]
+  },
+  
+  // --- NEW: PERSONALITY & PSYCH PROFILE ---
+  "q_recharge": {
+    type: "mcq",
+    question: "How do you usually recharge mentally?",
+    options: [
+      { text: "Alone in a quiet, safe space.", trait: "recharge_introvert", nextId: "q_decision" },
+      { text: "Being around close friends or family.", trait: "recharge_extrovert", nextId: "q_decision" },
+      { text: "Doing something active, creative, or hands-on.", trait: "recharge_active", nextId: "q_decision" },
+      { text: "Sleeping or completely tuning out of reality.", trait: "recharge_passive", nextId: "q_decision" }
+    ]
+  },
+  "q_decision": {
+    type: "mcq",
+    question: "When facing a crisis or big problem, you are more likely to...",
+    options: [
+      { text: "Analyze the facts and look for a logical fix.", trait: "decision_logical", nextId: "q_values" },
+      { text: "Go with my gut feeling or intuition.", trait: "decision_intuitive", nextId: "q_values" },
+      { text: "Seek advice from someone I trust.", trait: "decision_collaborative", nextId: "q_values" },
+      { text: "Panic, overthink, or avoid it.", trait: "decision_avoidant", nextId: "q_values" }
+    ]
+  },
+  "q_values": {
+    type: "mcq",
+    question: "What do you value most in life and relationships?",
+    options: [
+      { text: "Total honesty, even if it hurts.", trait: "value_honesty", nextId: "q_self_perception" },
+      { text: "Loyalty and having each other's backs.", trait: "value_loyalty", nextId: "q_self_perception" },
+      { text: "Empathy, warmth, and understanding.", trait: "value_empathy", nextId: "q_self_perception" },
+      { text: "Personal freedom and independence.", trait: "value_independence", nextId: "q_self_perception" }
+    ]
+  },
+  "q_self_perception": {
+    type: "mcq",
+    question: "How would a close friend describe you?",
+    options: [
+      { text: "The reliable one who fixes things.", trait: "self_fixer", nextId: "q_energy" },
+      { text: "The sensitive, listening ear.", trait: "self_listener", nextId: "q_energy" },
+      { text: "The driven, ambitious one.", trait: "self_driven", nextId: "q_energy" },
+      { text: "A bit of a mystery, honestly.", trait: "self_guarded", nextId: "q_energy" }
+    ]
+  },
+
+  // --- UNIVERSAL CLOSING QUESTIONS ---
+  "q_energy": {
+    type: "mcq",
+    question: "Where is your energy level right now?",
+    options: [
+      { text: "Wired, anxious, and overthinking.", trait: "energy_high_anxiety", nextId: "q_support_style" },
+      { text: "Mentally exhausted, but trying to keep going.", trait: "energy_burnt_out", nextId: "q_support_style" },
+      { text: "Completely empty. I have nothing left.", trait: "energy_empty", nextId: "q_mindset" } 
+    ]
+  },
+  "q_support_style": {
+    type: "mcq",
+    question: "What kind of support usually works best for you?",
+    options: [
+      { text: "Give me a practical, step-by-step plan.", trait: "support_solutions", nextId: "q_mindset" },
+      { text: "Just listen and validate how I feel.", trait: "support_validation", nextId: "q_mindset" },
+      { text: "Honestly, I need tough love and a reality check.", trait: "support_tough_love", nextId: "q_mindset" }
+    ]
+  },
+  "q_mindset": {
+    type: "mcq",
+    question: "Lastly, how are you feeling about talking to me right now?",
+    options: [
+      { text: "I need practical advice.", trait: "action_oriented", nextId: null },
+      { text: "I just need someone to listen to me vent.", trait: "needs_venting", nextId: null },
+      { text: "I'm overwhelmed and just need a safe space.", trait: "crisis", nextId: null }
+    ]
+  }
+};
+
+let userTraits = [];
+let finalAIPersonality = "";
+let userAge = 0; 
+
+function startQuestionnaire() {
+  renderQuestion("q_age");
+}
+
+function renderQuestion(questionId) {
+  const q = questionBank[questionId];
+  
+  questionText.style.opacity = 0;
+  optionsContainer.style.opacity = 0;
+
+  setTimeout(() => {
+    questionText.textContent = q.question;
+    optionsContainer.innerHTML = "";
+    
+    if (q.type === "mcq") {
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'mcq-option';
+        btn.type = 'button';
+        btn.textContent = opt.text;
+        
+        btn.onclick = () => {
+          userTraits.push(opt.trait);
+          if (opt.nextId) {
+            renderQuestion(opt.nextId);
+          } else {
+            finishOnboarding();
+          }
+        };
+        optionsContainer.appendChild(btn);
+      });
+
+    } else if (q.type === "slider") {
+      optionsContainer.innerHTML = `
+        <div class="slider-container">
+          <div class="slider-value-display" id="sliderValue">${q.defaultVal}</div>
+          <input type="range" min="${q.min}" max="${q.max}" value="${q.defaultVal}" class="custom-slider" id="ageSlider">
+          <button class="next-btn" id="sliderNextBtn">Continue</button>
+        </div>
+      `;
+
+      const slider = document.getElementById('ageSlider');
+      const display = document.getElementById('sliderValue');
+      const nextBtn = document.getElementById('sliderNextBtn');
+
+      slider.addEventListener('input', (e) => {
+        let val = e.target.value;
+        display.textContent = val == 90 ? "90+" : val;
+      });
+
+      nextBtn.addEventListener('click', () => {
+        userAge = parseInt(slider.value);
+        userTraits.push(`age_${userAge}`); 
+        
+        const nextId = q.getNextId(userAge);
+        renderQuestion(nextId);
+      });
+    }
+
+    questionText.style.transition = "opacity 0.2s";
+    optionsContainer.style.transition = "opacity 0.2s";
+    questionText.style.opacity = 1;
+    optionsContainer.style.opacity = 1;
+  }, 200);
+}
+
+function finishOnboarding() {
+  const traits = userTraits.join(" ");
+
+  // Deep Psychological Hierarchy
+  
+  // 1. Extreme Crisis / Avoidant Guarded Profile
+  if (traits.includes("crisis") || traits.includes("energy_empty") || (traits.includes("decision_avoidant") && traits.includes("self_guarded"))) {
+    finalAIPersonality = "gentle_crisis_listener"; 
+    
+  // 2. High Logic / Tough Love Profile
+  } else if (traits.includes("support_tough_love") || (traits.includes("decision_logical") && traits.includes("value_honesty"))) {
+    finalAIPersonality = "direct_tough_love_coach";
+    
+  // 3. Driven / Fixer / Solution Profile (Academic or Career)
+  } else if ((traits.includes("jee_prep") || traits.includes("neet_prep") || traits.includes("career_focused") || traits.includes("self_driven") || traits.includes("self_fixer")) && traits.includes("support_solutions")) {
+    finalAIPersonality = "solution_oriented_mentor"; 
+    
+  // 4. Overworked / Burnout Profile
+  } else if (traits.includes("coping_overwork") && traits.includes("action_oriented")) {
+    finalAIPersonality = "burnout_recovery_guide";
+    
+  // 5. High Empathy / Validation Profile
+  } else if (traits.includes("needs_venting") || traits.includes("support_validation") || traits.includes("value_empathy") || traits.includes("self_listener")) {
+    finalAIPersonality = "empathetic_listener";
+    
+  // 6. High Anxiety / Grounding Profile
+  } else if (traits.includes("energy_high_anxiety")) {
+     finalAIPersonality = "calming_grounding_assistant";
+     
+  // 7. Default Safe Fallback
+  } else {
+    finalAIPersonality = "supportive_guide";
+  }
+  
+  console.log("Traits Collected:", userTraits);
+  console.log("Assigned AI Personality:", finalAIPersonality);
+  closeModal();
+}
+
+skipBtn.addEventListener('click', () => {
+  finalAIPersonality = "emergency_crisis_listener"; 
+  console.log("Skipped. Assigned AI Personality:", finalAIPersonality);
+  closeModal();
+});
+
+function closeModal() {
+  modalOverlay.classList.remove('active');
+  setTimeout(() => {
+    modalOverlay.style.display = 'none';
+    const chatInput = document.querySelector(".composer-row input");
+    if(chatInput) chatInput.focus();
+  }, 300);
+}
+
+// Trigger the questionnaire
+startQuestionnaire();
 
 </script>
 </body>
