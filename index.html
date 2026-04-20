@@ -2781,6 +2781,8 @@ const questionBank = {
     type: "mcq",
     question: "When school or life gets really heavy, what is your default reaction?",
     options: [
+      { text: "I step back, breathe, and tackle it piece by piece.", trait: "coping_process", nextId: "q_recharge" },
+      { text: "I talk it out with friends or family.", trait: "coping_talk", nextId: "q_recharge" },
       { text: "I hide in my room and shut everyone out.", trait: "coping_isolate", nextId: "q_recharge" },
       { text: "I distract myself (gaming, scrolling, YouTube).", trait: "coping_distract", nextId: "q_recharge" },
       { text: "I study obsessively so I don't fail.", trait: "coping_overwork", nextId: "q_recharge" },
@@ -2791,6 +2793,8 @@ const questionBank = {
     type: "mcq",
     question: "When things get really heavy, what is your default reaction?",
     options: [
+      { text: "I pause, reflect, and make a logical plan.", trait: "coping_process", nextId: "q_recharge" },
+      { text: "I reach out to a friend or partner to talk.", trait: "coping_talk", nextId: "q_recharge" },
       { text: "I isolate and shut down completely.", trait: "coping_isolate", nextId: "q_recharge" },
       { text: "Mindless distraction (phone, TV, internet).", trait: "coping_distract", nextId: "q_recharge" },
       { text: "I throw myself into work or tasks to ignore it.", trait: "coping_overwork", nextId: "q_recharge" },
@@ -2801,6 +2805,8 @@ const questionBank = {
     type: "mcq",
     question: "When you are feeling overwhelmed or down, how do you usually react?",
     options: [
+      { text: "I take a walk, garden, or do something calming.", trait: "coping_process", nextId: "q_recharge" },
+      { text: "I call a friend or family member to chat.", trait: "coping_talk", nextId: "q_recharge" },
       { text: "I withdraw and keep to myself.", trait: "coping_isolate", nextId: "q_recharge" },
       { text: "I just watch TV or listen to the radio.", trait: "coping_distract", nextId: "q_recharge" },
       { text: "I try to stay constantly busy to not think about it.", trait: "coping_overwork", nextId: "q_recharge" },
@@ -2855,6 +2861,8 @@ const questionBank = {
     type: "mcq",
     question: "Where is your energy level right now?",
     options: [
+      { text: "Doing great! Just looking to explore and grow.", trait: "energy_great", nextId: "q_support_style" },
+      { text: "I'm doing okay. Just normal, everyday stress.", trait: "energy_okay", nextId: "q_support_style" },
       { text: "Wired, anxious, and overthinking.", trait: "energy_high_anxiety", nextId: "q_support_style" },
       { text: "Mentally exhausted, but trying to keep going.", trait: "energy_burnt_out", nextId: "q_support_style" },
       { text: "Completely empty. I have nothing left.", trait: "energy_empty", nextId: "q_mindset" } 
@@ -2873,6 +2881,7 @@ const questionBank = {
     type: "mcq",
     question: "Lastly, how are you feeling about talking to me right now?",
     options: [
+      { text: "I'm feeling good, just want to brainstorm or chat.", trait: "growth_oriented", nextId: null },
       { text: "I need practical advice.", trait: "action_oriented", nextId: null },
       { text: "I just need someone to listen to me vent.", trait: "needs_venting", nextId: null },
       { text: "I'm overwhelmed and just need a safe space.", trait: "crisis", nextId: null }
@@ -3058,9 +3067,16 @@ function generateDynamicDescription(personaId, traits) {
   // 1. Acknowledge their current life stage & energy
   const isStudent = traits.some(t => ["10th_boards", "12th_boards", "jee_prep", "neet_prep", "other_competitive", "college", "dropper_prep"].includes(t));
   const isWorking = traits.some(t => ["early_career", "career_focused", "work_family_balance", "working_senior"].includes(t));
+  
   const isBurntOut = traits.includes("energy_burnt_out") || traits.includes("energy_empty") || traits.includes("struggling");
+  const isHappy = traits.includes("energy_great") || traits.includes("growth_oriented");
+  const isOkay = traits.includes("energy_okay");
 
-  if (isStudent && isBurntOut) {
+  if (isHappy) {
+    desc += "Since you're feeling good and looking to grow, we can focus on leveling up your ideas and maintaining that positive momentum. ";
+  } else if (isOkay) {
+    desc += "Dealing with everyday stress is totally normal, so we'll focus on keeping things balanced and manageable. ";
+  } else if (isStudent && isBurntOut) {
     desc += "Navigating high-pressure academics while running on empty requires a careful approach. ";
   } else if (isStudent) {
     desc += "Academic pressure requires clear focus and strategy. ";
@@ -3106,6 +3122,8 @@ function finishOnboarding() {
 
   // 2. The Advanced AI Weighting Matrix
   const traitWeights = {
+    "coping_process": { deep_reflector: 4, socratic_guide: 3, pragmatic_realist: 2 },
+    "coping_talk": { empathetic_listener: 3, supportive_guide: 3, gentle_motivator: 1 },
     "coping_isolate": { gentle_crisis_listener: 3, deep_reflector: 2, calming_grounding_assistant: 1 },
     "coping_distract": { burnout_recovery_guide: 1, gentle_motivator: 2 },
     "coping_overwork": { burnout_recovery_guide: 4, structured_planner: 2, pragmatic_realist: 1 },
@@ -3131,6 +3149,8 @@ function finishOnboarding() {
     "self_driven": { structured_planner: 3, burnout_recovery_guide: 2 },
     "self_guarded": { gentle_crisis_listener: 3, socratic_guide: 2 },
 
+    "energy_great": { gentle_motivator: 4, solution_oriented_mentor: 3, socratic_guide: 2 },
+    "energy_okay": { supportive_guide: 4, pragmatic_realist: 3, deep_reflector: 2 },
     "energy_high_anxiety": { calming_grounding_assistant: 5, structured_planner: 2 },
     "energy_burnt_out": { burnout_recovery_guide: 5, gentle_motivator: 3 },
     "energy_empty": { gentle_crisis_listener: 6, burnout_recovery_guide: 2 },
@@ -3139,6 +3159,7 @@ function finishOnboarding() {
     "support_validation": { empathetic_listener: 5, gentle_motivator: 3, deep_reflector: 2 },
     "support_tough_love": { direct_tough_love_coach: 6, pragmatic_realist: 3 },
 
+    "growth_oriented": { solution_oriented_mentor: 4, gentle_motivator: 4, socratic_guide: 3 },
     "action_oriented": { solution_oriented_mentor: 4, pragmatic_realist: 3 },
     "needs_venting": { empathetic_listener: 4, deep_reflector: 2 },
     "crisis": { gentle_crisis_listener: 8 } 
