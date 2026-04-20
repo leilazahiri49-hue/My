@@ -2242,7 +2242,7 @@
       animateTo(nextIndex, enterClass, () => renderConversation(nextIndex));
       
       loadDraft(nextIndex);
-      document.querySelector(".composer-row input").focus();
+      if (!mobileQuery.matches) document.querySelector(".composer-row input").focus();
     }
 
     function showNewChat() {
@@ -2254,7 +2254,7 @@
       animateTo(-1, "enter-from-top", renderStartScreen);
       
       loadDraft(-1);
-      document.querySelector(".composer-row input").focus();
+      if (!mobileQuery.matches) document.querySelector(".composer-row input").focus();
     }
 
     chatButtons.forEach((button) => {
@@ -2682,14 +2682,17 @@ chatInput.addEventListener("keydown", (e) => {
   }
 });
 
-// 3. Focus the input immediately when the page loads
-chatInput.focus();
+// 3. Focus the input immediately when the page loads (Laptops only)
+if (!mobileQuery.matches) {
+  chatInput.focus();
+}
 
-// 4. Focus the input whenever you switch tabs and come back to the website
+// 4. Focus the input whenever you switch tabs and come back (Laptops only)
 window.addEventListener("focus", () => {
-  // A tiny delay ensures the browser has fully rendered the tab before focusing
   setTimeout(() => {
-    chatInput.focus();
+    if (!mobileQuery.matches) {
+      chatInput.focus();
+    }
   }, 50); 
 });
 
@@ -3255,7 +3258,9 @@ function closeModal() {
   setTimeout(() => {
     modalOverlay.style.display = 'none';
     const chatInput = document.querySelector(".composer-row input");
-    if(chatInput) chatInput.focus();
+    if (chatInput && !mobileQuery.matches) {
+      chatInput.focus();
+    }
   }, 300);
 }
 
