@@ -32,6 +32,7 @@
     html,
     body {
       height: 100%;
+      height: 100dvh; /* NEW: Dynamic Viewport Height prevents Safari bottom-bar clipping */
     }
 
     body {
@@ -52,7 +53,7 @@
       display: flex;
       gap: 14px;
       width: 100%;
-      height: 100vh;
+      height: 100dvh; /* NEW: Adapts perfectly to mobile browser toolbars */
       padding: 14px;
     }
 
@@ -1678,24 +1679,34 @@
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  animation: modeLabelChange 0.5s ease forwards; /* Reusing your slick fade-in animation! */
+  flex: 1; /* Allows it to respect the modal's max-height */
+  overflow-y: auto; /* Enables scrolling for longer dynamic text */
+  scrollbar-width: none; /* Hides scrollbar on Firefox for a clean look */
+  animation: modeLabelChange 0.5s ease forwards; 
+}
+
+/* Hides scrollbar on Chrome/Safari for a clean look */
+.result-container::-webkit-scrollbar {
+  display: none;
 }
 
 .result-container h3 {
   font-size: 1.2rem;
   color: var(--text);
+  flex-shrink: 0; /* Prevents text from squishing */
 }
 
 .result-badge {
-  font-size: 1.6rem;
+  font-size: 1.4rem; /* Slightly smaller to fit mobile screens better */
   font-weight: 800;
   color: var(--accent);
   background: var(--accent-soft);
-  padding: 18px 32px;
+  padding: 16px 28px;
   border-radius: 20px;
   border: 1px solid rgba(84, 210, 255, 0.3);
   margin: 10px 0;
   box-shadow: 0 10px 30px rgba(84, 210, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .result-description {
@@ -1703,7 +1714,12 @@
   font-size: 0.95rem;
   line-height: 1.6;
   max-width: 400px;
-  margin-bottom: 16px;
+  margin-bottom: auto; /* Magic trick: Pushes the 'Enter Chat' button to the absolute bottom */
+}
+
+#startChatBtn {
+  flex-shrink: 0; /* Prevents the button from getting crushed by the text */
+  margin-top: 10px;
 }
 
 /* --- Start Screen Styles --- */
@@ -3009,102 +3025,118 @@ function renderQuestion(questionId) {
   }, 200);
 }
 
-// Map the internal personality IDs to user-facing titles and descriptions
+// Expanded matrix of 12 Personalities
 const personalityProfiles = {
-  "gentle_crisis_listener": { 
-    title: "The Safe Haven", 
-    desc: "Your space is configured to prioritize emotional safety. I am here to offer a gentle, non-judgmental environment with zero pressure." 
-  },
-  "direct_tough_love_coach": { 
-    title: "The Reality Check", 
-    desc: "Your space is configured to give it to you straight. We will focus on logic, accountability, and honest, direct feedback." 
-  },
-  "solution_oriented_mentor": { 
-    title: "The Strategist", 
-    desc: "Your space is configured for action. I am here to help you break down big problems into manageable, step-by-step plans." 
-  },
-  "burnout_recovery_guide": { 
-    title: "The Anchor", 
-    desc: "Your space is configured to help you slow down. I am here to help you manage overwhelm and find balance when you are pushing too hard." 
-  },
-  "empathetic_listener": { 
-    title: "The Empathetic Ear", 
-    desc: "Your space is configured for pure listening. I am here to validate your feelings and support you, without rushing to 'fix' things." 
-  },
-  "calming_grounding_assistant": { 
-    title: "The Grounding Force", 
-    desc: "Your space is configured to help soothe anxiety. I am here to offer calming perspectives and help you untangle overthinking." 
-  },
-  "supportive_guide": { 
-    title: "The Supportive Guide", 
-    desc: "Your space is configured to be a balanced companion. I am here to offer a mix of friendly support and practical guidance." 
-  }
+  "gentle_crisis_listener": { title: "The Safe Haven", base: "Your space prioritizes emotional safety and zero pressure." },
+  "direct_tough_love_coach": { title: "The Reality Check", base: "Your space is built for logic, accountability, and absolute honesty." },
+  "solution_oriented_mentor": { title: "The Strategist", base: "Your space is configured for action and breaking down big problems." },
+  "burnout_recovery_guide": { title: "The Anchor", base: "Your space is designed to help you slow down and find balance." },
+  "empathetic_listener": { title: "The Empathetic Ear", base: "Your space is dedicated to pure listening and validation." },
+  "calming_grounding_assistant": { title: "The Grounding Force", base: "Your space is calibrated to soothe anxiety and untangle overthinking." },
+  "supportive_guide": { title: "The Supportive Guide", base: "Your space offers a balanced mix of friendly support and practical guidance." },
+  "pragmatic_realist": { title: "The Pragmatic Realist", base: "Your space focuses on realistic, grounded advice without overwhelming you." },
+  "deep_reflector": { title: "The Deep Reflector", base: "Your space encourages introspection, pacing, and intuitive thinking." },
+  "structured_planner": { title: "The Architect", base: "Your space is highly organized to bring order to the chaos." },
+  "gentle_motivator": { title: "The Gentle Motivator", base: "Your space provides encouragement and momentum without adding pressure." },
+  "socratic_guide": { title: "The Socratic Guide", base: "Your space is designed to help you find your own answers through guided reflection." }
 };
 
+// --- NEW: Dynamic Description Generator ---
+function generateDynamicDescription(personaId, traits) {
+  const profile = personalityProfiles[personaId];
+  let desc = profile.base + " ";
+
+  // 1. Acknowledge their current life stage & energy
+  const isStudent = traits.some(t => ["10th_boards", "12th_boards", "jee_prep", "neet_prep", "other_competitive", "college", "dropper_prep"].includes(t));
+  const isWorking = traits.some(t => ["early_career", "career_focused", "work_family_balance", "working_senior"].includes(t));
+  const isBurntOut = traits.includes("energy_burnt_out") || traits.includes("energy_empty") || traits.includes("struggling");
+
+  if (isStudent && isBurntOut) {
+    desc += "Navigating high-pressure academics while running on empty requires a careful approach. ";
+  } else if (isStudent) {
+    desc += "Academic pressure requires clear focus and strategy. ";
+  } else if (isWorking && isBurntOut) {
+    desc += "Balancing heavy daily responsibilities while feeling mentally exhausted means we need to pace things. ";
+  } else if (isWorking) {
+    desc += "Managing a demanding schedule requires efficiency and grounding. ";
+  }
+
+  // 2. Outline the AI's communication style
+  if (traits.includes("support_solutions")) {
+    desc += "Conversations will be highly actionable, offering practical, step-by-step plans rather than vague advice. ";
+  } else if (traits.includes("support_tough_love")) {
+    desc += "Expect direct, honest feedback to keep you accountable, without any sugarcoating. ";
+  } else if (traits.includes("support_validation") || traits.includes("needs_venting")) {
+    desc += "This will be a space to vent freely—focused on listening and validating your experience without rushing to 'fix' it. ";
+  } else {
+    desc += "The tone will remain adaptable, acting as a sounding board whenever you need one. ";
+  }
+
+  // 3. Acknowledge their coping mechanisms and psychology
+  if (traits.includes("coping_isolate") || traits.includes("recharge_introvert") || traits.includes("self_guarded")) {
+    desc += "Knowing that you recharge best in quiet, safe spaces, interactions here will always remain low-pressure and entirely on your terms.";
+  } else if (traits.includes("coping_overwork") || traits.includes("self_driven")) {
+    desc += "Because the instinct is often to overwork through stress, part of the process here will involve helping you recognize when it is time to step back.";
+  } else if (traits.includes("decision_logical") || traits.includes("value_honesty")) {
+    desc += "Challenges will be broken down analytically, keeping emotion from clouding logical decision-making.";
+  } else if (traits.includes("value_independence") || traits.includes("decision_intuitive")) {
+    desc += "You will be guided to find your own answers, respecting your fierce independence and intuition.";
+  }
+
+  return desc;
+}
+
 function finishOnboarding() {
-  // 1. Initialize the scoreboard
+  // 1. Initialize the expanded 12-profile scoreboard
   const scores = {
-    gentle_crisis_listener: 0,
-    direct_tough_love_coach: 0,
-    solution_oriented_mentor: 0,
-    burnout_recovery_guide: 0,
-    empathetic_listener: 0,
-    calming_grounding_assistant: 0,
-    supportive_guide: 1 // Base score tie-breaker
+    gentle_crisis_listener: 0, direct_tough_love_coach: 0, solution_oriented_mentor: 0,
+    burnout_recovery_guide: 0, empathetic_listener: 0, calming_grounding_assistant: 0,
+    supportive_guide: 1, pragmatic_realist: 0, deep_reflector: 0,
+    structured_planner: 0, gentle_motivator: 0, socratic_guide: 0
   };
 
-  // 2. The AI Weighting Matrix
-  // Every trait adds specific points to specific profiles
+  // 2. The Advanced AI Weighting Matrix
   const traitWeights = {
-    // Coping Mechanisms
-    "coping_isolate": { gentle_crisis_listener: 3, calming_grounding_assistant: 1 },
-    "coping_distract": { burnout_recovery_guide: 1, calming_grounding_assistant: 1 },
-    "coping_overwork": { burnout_recovery_guide: 4, solution_oriented_mentor: 1 },
-    "coping_anger": { calming_grounding_assistant: 3, gentle_crisis_listener: 1 },
+    "coping_isolate": { gentle_crisis_listener: 3, deep_reflector: 2, calming_grounding_assistant: 1 },
+    "coping_distract": { burnout_recovery_guide: 1, gentle_motivator: 2 },
+    "coping_overwork": { burnout_recovery_guide: 4, structured_planner: 2, pragmatic_realist: 1 },
+    "coping_anger": { calming_grounding_assistant: 3, socratic_guide: 1 },
     
-    // Recharging
-    "recharge_introvert": { empathetic_listener: 2, gentle_crisis_listener: 1 },
-    "recharge_extrovert": { supportive_guide: 2 },
-    "recharge_active": { solution_oriented_mentor: 2, burnout_recovery_guide: 1 },
+    "recharge_introvert": { empathetic_listener: 2, deep_reflector: 3 },
+    "recharge_extrovert": { supportive_guide: 2, gentle_motivator: 2 },
+    "recharge_active": { solution_oriented_mentor: 2, structured_planner: 1 },
     "recharge_passive": { gentle_crisis_listener: 2, burnout_recovery_guide: 2 },
 
-    // Decision Making
-    "decision_logical": { solution_oriented_mentor: 4, direct_tough_love_coach: 2 },
-    "decision_intuitive": { empathetic_listener: 2, supportive_guide: 2 },
-    "decision_collaborative": { supportive_guide: 3, empathetic_listener: 1 },
+    "decision_logical": { solution_oriented_mentor: 4, pragmatic_realist: 3, direct_tough_love_coach: 2 },
+    "decision_intuitive": { empathetic_listener: 2, deep_reflector: 3, socratic_guide: 2 },
+    "decision_collaborative": { supportive_guide: 3, gentle_motivator: 2 },
     "decision_avoidant": { gentle_crisis_listener: 4, calming_grounding_assistant: 2 },
 
-    // Values
-    "value_honesty": { direct_tough_love_coach: 4, solution_oriented_mentor: 1 },
-    "value_loyalty": { supportive_guide: 2, empathetic_listener: 2 },
-    "value_empathy": { empathetic_listener: 4, gentle_crisis_listener: 2 },
-    "value_independence": { direct_tough_love_coach: 2, solution_oriented_mentor: 2 },
+    "value_honesty": { direct_tough_love_coach: 4, pragmatic_realist: 3, socratic_guide: 1 },
+    "value_loyalty": { supportive_guide: 2, gentle_motivator: 2 },
+    "value_empathy": { empathetic_listener: 4, deep_reflector: 2 },
+    "value_independence": { socratic_guide: 4, direct_tough_love_coach: 2 },
 
-    // Self Perception
-    "self_fixer": { solution_oriented_mentor: 3, direct_tough_love_coach: 1 },
-    "self_listener": { empathetic_listener: 3, gentle_crisis_listener: 1 },
-    "self_driven": { solution_oriented_mentor: 2, burnout_recovery_guide: 2 },
-    "self_guarded": { gentle_crisis_listener: 3, direct_tough_love_coach: 1 },
+    "self_fixer": { solution_oriented_mentor: 3, structured_planner: 2 },
+    "self_listener": { empathetic_listener: 3, deep_reflector: 2 },
+    "self_driven": { structured_planner: 3, burnout_recovery_guide: 2 },
+    "self_guarded": { gentle_crisis_listener: 3, socratic_guide: 2 },
 
-    // Energy Levels
-    "energy_high_anxiety": { calming_grounding_assistant: 5, gentle_crisis_listener: 1 },
-    "energy_burnt_out": { burnout_recovery_guide: 5, empathetic_listener: 2 },
+    "energy_high_anxiety": { calming_grounding_assistant: 5, structured_planner: 2 },
+    "energy_burnt_out": { burnout_recovery_guide: 5, gentle_motivator: 3 },
     "energy_empty": { gentle_crisis_listener: 6, burnout_recovery_guide: 2 },
 
-    // Support Style
-    "support_solutions": { solution_oriented_mentor: 5, direct_tough_love_coach: 2 },
-    "support_validation": { empathetic_listener: 5, gentle_crisis_listener: 2 },
-    "support_tough_love": { direct_tough_love_coach: 6 },
+    "support_solutions": { solution_oriented_mentor: 5, structured_planner: 4, pragmatic_realist: 2 },
+    "support_validation": { empathetic_listener: 5, gentle_motivator: 3, deep_reflector: 2 },
+    "support_tough_love": { direct_tough_love_coach: 6, pragmatic_realist: 3 },
 
-    // Final Mindset
-    "action_oriented": { solution_oriented_mentor: 4, direct_tough_love_coach: 2 },
-    "needs_venting": { empathetic_listener: 4, calming_grounding_assistant: 2 },
-    "crisis": { gentle_crisis_listener: 8 } // Immediate heavy weight for safety
+    "action_oriented": { solution_oriented_mentor: 4, pragmatic_realist: 3 },
+    "needs_venting": { empathetic_listener: 4, deep_reflector: 2 },
+    "crisis": { gentle_crisis_listener: 8 } 
   };
 
-  // 3. Calculate scores based on the user's unique combination
+  // 3. Calculate scores based on combinations
   userTraits.forEach(trait => {
-    // Add base weights
     if (traitWeights[trait]) {
       const weights = traitWeights[trait];
       for (const persona in weights) {
@@ -3112,22 +3144,19 @@ function finishOnboarding() {
       }
     }
 
-    // --- Complex Permutations (Combo Multipliers) ---
-    // If they are a high-pressure student AND they are burnt out
-    if ((trait === "jee_prep" || trait === "neet_prep") && userTraits.includes("energy_burnt_out")) {
-      scores.burnout_recovery_guide += 3;
+    // Complex Permutations
+    if ((trait === "jee_prep" || trait === "neet_prep") && userTraits.includes("support_solutions")) {
+      scores.structured_planner += 4;
     }
-    // If they value blunt honesty AND asked for tough love
-    if (trait === "value_honesty" && userTraits.includes("support_tough_love")) {
-      scores.direct_tough_love_coach += 3;
+    if (trait === "value_independence" && userTraits.includes("support_validation")) {
+      scores.socratic_guide += 4;
     }
-    // If they are highly avoidant AND their energy is empty
     if (trait === "decision_avoidant" && userTraits.includes("energy_empty")) {
       scores.gentle_crisis_listener += 4;
     }
   });
 
-  // 4. Determine the winner (The AI Logic step)
+  // 4. Determine the winner
   let highestScore = -1;
   let winningPersona = "supportive_guide"; 
 
@@ -3140,27 +3169,25 @@ function finishOnboarding() {
 
   finalAIPersonality = winningPersona;
 
-  // Log the math to the console so you can see exactly how the AI made its decision
   console.log("Traits Collected:", userTraits);
   console.log("Scoreboard Calculation:", scores);
   console.log("Assigned AI Personality:", finalAIPersonality);
   
-  // Transition the UI from Questions to Results
   showResultScreen();
 }
 
 function showResultScreen() {
-  // Grab the elements
   const questionContainer = document.getElementById('questionContainer');
   const resultContainer = document.getElementById('resultContainer');
   const skipButton = document.getElementById('skipBtn');
   
-  // Update the text based on their profile
-  const profile = personalityProfiles[finalAIPersonality];
-  document.getElementById('resultBadge').textContent = profile.title;
-  document.getElementById('resultDescription').textContent = profile.desc;
+  // --- NEW: Generate the completely unique profile description ---
+  const profileTitle = personalityProfiles[finalAIPersonality].title;
+  const customDescription = generateDynamicDescription(finalAIPersonality, userTraits);
+  
+  document.getElementById('resultBadge').textContent = profileTitle;
+  document.getElementById('resultDescription').textContent = customDescription;
 
-  // Smoothly fade out the old content and fade in the new content
   questionContainer.style.opacity = 0;
   skipButton.style.opacity = 0;
 
