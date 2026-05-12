@@ -723,70 +723,154 @@
     }
 
     .search-highlight {
-      background-color: var(--accent-soft);
-      color: var(--accent);
-      border-radius: 3px;
-      padding: 0 2px;
-      transition: all 0.2s;
+      padding: 0.02em 0.22em;
+      border-radius: 7px;
+      color: #dff6ff;
+      background:
+        linear-gradient(180deg, rgba(84, 210, 255, 0.24), rgba(84, 210, 255, 0.12));
+      box-shadow:
+        inset 0 0 0 1px rgba(84, 210, 255, 0.24),
+        0 0 18px rgba(84, 210, 255, 0.12);
+      transition:
+        color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
     }
 
     .search-highlight.active-match {
-      background-color: var(--accent);
       color: #08111a;
-      box-shadow: 0 0 8px var(--accent-soft);
+      background: linear-gradient(135deg, #8beaff, #54d2ff);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.42),
+        0 0 22px rgba(84, 210, 255, 0.42);
     }
 
-    /* Better visibility for highlights inside user text bubbles */
     .message-row.user .search-highlight {
-      background-color: rgba(0, 0, 0, 0.25);
-      color: #fff;
+      color: #07111b;
+      background: rgba(255, 255, 255, 0.5);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.36);
     }
 
     .message-row.user .search-highlight.active-match {
-      background-color: #fff;
-      color: #000;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+      color: #07111b;
+      background: #ffffff;
+      box-shadow:
+        0 0 0 1px rgba(8, 17, 26, 0.12),
+        0 0 18px rgba(255, 255, 255, 0.55);
     }
 
     .search-navigator {
       position: absolute;
-      bottom: 90px;
+      bottom: 92px;
       left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: rgba(15, 22, 36, 0.98);
-      border: 1px solid var(--line-strong);
-      border-radius: 24px;
-      padding: 6px 12px;
+      transform: translateX(-50%) translateY(12px) scale(0.96);
+      min-height: 56px;
+      padding: 8px 10px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       z-index: 100;
       opacity: 0;
       visibility: hidden;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: var(--shadow);
+      pointer-events: none;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+        rgba(8, 13, 23, 0.18);
+      backdrop-filter: blur(6px) saturate(112%);
+      -webkit-backdrop-filter: blur(6px) saturate(112%);
+      box-shadow:
+        0 14px 28px rgba(0, 0, 0, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.055);
+      transition:
+        opacity 0.22s ease,
+        visibility 0.22s ease,
+        transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
+ @keyframes navigatorShake {
+  0%   { transform: translateX(-50%) translateX(0); }
+  15%  { transform: translateX(-50%) translateX(-6px); }
+  30%  { transform: translateX(-50%) translateX(6px); }
+  45%  { transform: translateX(-50%) translateX(-5px); }
+  60%  { transform: translateX(-50%) translateX(5px); }
+  75%  { transform: translateX(-50%) translateX(-3px); }
+  90%  { transform: translateX(-50%) translateX(3px); }
+  100% { transform: translateX(-50%) translateX(0); }
+}
+
+.search-navigator.shake {
+  animation: navigatorShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
 
     .search-navigator.visible {
       opacity: 1;
       visibility: visible;
-      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0) scale(1);
     }
 
     .search-count {
-      font-size: 0.9rem;
-      color: var(--text);
+      min-width: 68px;
+      padding: 0 8px;
+      color: #c9dcff;
+      font-size: 0.88rem;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+      text-align: center;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
 
-    .nav-btn {
-      width: 28px;
-      height: 28px;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .search-navigator .nav-btn,
+    .search-navigator .nav-btn:hover,
+    .search-navigator .nav-btn:focus-visible {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--text);
+      background: rgba(15, 22, 36, 0.35);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      outline: none;
+    }
+
+    .search-navigator .nav-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #searchPrevBtn:hover svg,
+    #searchPrevBtn:focus-visible svg {
+      transform: translateY(-2px);
+    }
+
+    #searchNextBtn:hover svg,
+    #searchNextBtn:focus-visible svg {
+      transform: translateY(2px);
+    }
+    @media (max-width: 640px) {
+      .search-navigator {
+        bottom: 84px;
+        min-height: 44px;
+        padding: 5px;
+      }
+
+      .nav-btn {
+        width: 34px;
+        height: 34px;
+      }
+
+      .search-count {
+        min-width: 52px;
+        font-size: 0.78rem;
+      }
     }
 
     .icon-button {
@@ -1096,6 +1180,80 @@
       background: var(--user);
     }
 
+    .bubble.typing::after {
+      content: "";
+      width: 7px;
+      height: 1.05em;
+      display: inline-block;
+      margin-left: 3px;
+      border-radius: 999px;
+      background: var(--accent);
+      vertical-align: -0.16em;
+      animation: caretBlink 0.8s steps(2, end) infinite;
+    }
+
+    .thinking-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 760px;
+      animation: thinkingRise 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .thinking-card {
+      padding: 14px 18px; /* Slightly more breathing room */
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid transparent; /* Removes the harsh border */
+      border-radius: 16px; /* Matches your chat bubbles perfectly */
+      background: transparent; /* Makes it look like it's floating cleanly */
+    }
+
+    .thinking-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text);
+      opacity: 0.3;
+      animation: aestheticPulse 1.4s infinite ease-in-out both;
+    }
+
+    .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
+    .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+    .thinking-dot:nth-child(3) { animation-delay: 0s; }
+
+    @keyframes aestheticPulse {
+      0%, 80%, 100% {
+        opacity: 0.15;
+        transform: translateY(0px) scale(0.8);
+      }
+      40% {
+        opacity: 0.9;
+        transform: translateY(-3px) scale(1.1);
+        background: var(--accent); /* Lights up with your blue accent color */
+        box-shadow: 0 0 8px rgba(84, 210, 255, 0.5); /* Adds a soft, premium glow */
+      }
+    }
+
+    @keyframes thinkingRise {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes caretBlink {
+      0%, 46% { opacity: 1; }
+      47%, 100% { opacity: 0; }
+    }
+
     .meta {
       color: var(--muted);
       font-size: 0.78rem;
@@ -1112,8 +1270,9 @@
       border: 1px solid var(--line);
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.035);
-      padding: 7px 8px 7px 18px;
+      padding: 0 8px 0 0; /* Moved the top/bottom/left padding to the input */
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      cursor: text; /* Makes the cursor an I-beam over the whole pill */
     }
 
     .composer-row {
@@ -1130,7 +1289,8 @@
       background: transparent;
       color: var(--text);
       font-size: 0.95rem;
-      padding: 6px 0;
+      padding: 13px 0 13px 18px; /* The input now stretches to fill the left curve and height */
+      border-radius: 999px 0 0 999px; /* Curves the input hit-box to match the shell */
     }
 
     .composer-row input::placeholder {
@@ -1146,15 +1306,38 @@
       border-radius: 50%;
       color: #08111a;
       background: linear-gradient(135deg, #7ae6ff, #4aa8ff);
-      transition: transform 0.18s ease, filter 0.18s ease;
+      /* Changed transition to 'all' so the shape morphs smoothly */
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-   .send-button:hover {
+    /* Only slide right on hover if it's NOT loading */
+    .send-button:hover:not(.loading) {
       filter: brightness(1.08);
       transform: translateX(1px);
     }
 
-    .mobile-overlay {
+    .send-button.loading,
+    .send-button:disabled {
+      position: relative;
+      color: transparent;
+      pointer-events: none;
+      filter: none;
+      transform: none;
+    }
+
+    .send-button.loading::after {
+      content: "";
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(8, 17, 26, 0.24);
+      border-top-color: #08111a;
+      animation: sendSpin 0.72s linear infinite;
+    }
+
+    @keyframes sendSpin {
+      to { transform: rotate(360deg); }
+    }.mobile-overlay {
       position: fixed;
       top: 0;
       left: 0;
@@ -1221,7 +1404,8 @@
       .sidebar.collapsed .brand-text, .sidebar.collapsed .new-chat-text, .sidebar.collapsed .chat-copy { width: auto; opacity: 1; position: relative; visibility: visible; }
       .sidebar.collapsed .new-chat { width: auto; padding: 0 14px; gap: 12px; justify-content: flex-start; }
       .sidebar.collapsed .chat-item { width: 100%; height: auto; padding: 10px 12px; justify-content: flex-start; gap: 12px; }
-      .sidebar.collapsed .chat-item .chat-icon { width: 36px; height: 36px; font-size: 0.86rem; }
+      .sidebar.collapsed .chat-item .chat-icon { width: 36px;
+      height: 36px; font-size: 0.86rem; }
       .sidebar.collapsed .section-label { opacity: 1; max-height: 20px; }
 
       .sidebar-header,
@@ -1319,16 +1503,25 @@
         line-height: 1.55;
       }
 
-      .composer {
+      .thinking-row {
+        max-width: 100%;
+        gap: 10px;
+      }
+
+      .thinking-card {
+        min-width: 66px;
+        padding: 11px 13px;
+      }.composer {
         padding: 8px 10px 10px;
       }
 
       .composer-shell {
-        padding: 6px 7px 6px 14px;
+        padding: 0 7px 0 0; /* Only right padding for the button */
       }
 
       .composer-row input {
         font-size: 0.9rem;
+        padding: 12px 0 12px 14px; /* Stretches the mobile input hit-box */
       }
 
       .send-button {
@@ -1717,6 +1910,7 @@
   align-items: center;
   gap: 24px;
   margin-top: 20px;
+  padding: 0 12px; /* Adds padding so the thumb doesn't hit the edges */
 }
 
 input.slider-value-display {
@@ -1734,7 +1928,6 @@ input.slider-value-display {
   font-family: inherit;
 }
 
-/* Hides the default up/down arrows on number inputs */
 input.slider-value-display::-webkit-outer-spin-button,
 input.slider-value-display::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -1747,7 +1940,8 @@ input.slider-value-display[type=number] {
 .custom-slider {
   -webkit-appearance: none;
   appearance: none;
-  width: 100%;
+  width: calc(100% - 16px); /* Stops the scaled thumb from clipping */
+  margin: 12px 8px; /* Adds vertical breathing room for hover scale */
   height: 8px;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.1);
@@ -1917,6 +2111,15 @@ input.slider-value-display[type=number] {
     font-size: 0.75rem;
   }
 }
+    @media (prefers-reduced-motion: reduce) {
+      .thinking-row,
+      .thinking-dot,
+      .bubble.typing::after,
+      .send-button.loading::after {
+        animation: none !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -2052,9 +2255,19 @@ input.slider-value-display[type=number] {
       </header>
 
       <div class="search-navigator" id="searchNavigator">
-        <button class="icon-button nav-btn" id="searchPrevBtn" aria-label="Previous match">↑</button>
+        <button class="icon-button nav-btn" id="searchPrevBtn" aria-label="Previous match">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 19V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+            <path d="m7 11 5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
         <span class="search-count" id="searchCount">0 / 0</span>
-        <button class="icon-button nav-btn" id="searchNextBtn" aria-label="Next match">↓</button>
+        <button class="icon-button nav-btn" id="searchNextBtn" aria-label="Next match">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 5v13" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+            <path d="m7 13 5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
       </div>
 
       <section class="messages" id="messages"></section>
@@ -2193,13 +2406,27 @@ input.slider-value-display[type=number] {
         </div>
       </div>
     `;
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[char]));
+    }
+
     function createMessage(message) {
+      const isUser = message.who === "user";
+      const bubbleId = message.bubbleId ? ` id="${escapeHTML(message.bubbleId)}"` : "";
+      const metaId = message.id ? ` id="${escapeHTML(message.id)}"` : "";
+
       return `
-        <div class="message-row ${message.who === "user" ? "user" : ""}">
-          <div class="avatar ${message.who === "user" ? "user" : "bot"}">${message.name}</div>
+        <div class="message-row ${isUser ? "user" : ""}">
+          <div class="avatar ${isUser ? "user" : "bot"}">${escapeHTML(message.name)}</div>
           <div class="bubble-wrap">
-            <div class="bubble">${message.text}</div>
-            <div class="meta" ${message.id ? `id="${message.id}"` : ''}>${message.meta}</div>
+            <div class="bubble"${bubbleId}>${escapeHTML(message.text)}</div>
+            <div class="meta"${metaId}>${escapeHTML(message.meta)}</div>
           </div>
         </div>
       `;
@@ -2527,7 +2754,7 @@ input.slider-value-display[type=number] {
 
     searchInput.addEventListener('input', (e) => {
       const keyword = e.target.value.trim();
-      if (keyword.length < 2) {
+      if (keyword.length < 1) {
         clearHighlights();
         hideNavigator();
         return;
@@ -2546,7 +2773,10 @@ input.slider-value-display[type=number] {
 
     function performSearch(keyword) {
       clearHighlights();
-      if (!keyword) return;
+
+      if (!keyword || keyword.length === 0) return;
+
+      const regex = new RegExp(`\\b${escapeRegExp(keyword)}\\b`, 'gi');
 
       const walker = document.createTreeWalker(
         messagesContainer,
@@ -2566,31 +2796,31 @@ input.slider-value-display[type=number] {
       const nodesToReplace = [];
       let node;
       while ((node = walker.nextNode())) {
-        if (node.nodeValue.toLowerCase().includes(keyword.toLowerCase())) {
+        if (regex.test(node.nodeValue)) {
           nodesToReplace.push(node);
+          regex.lastIndex = 0;
         }
       }
 
       searchMatches = [];
-      
+
       nodesToReplace.forEach(textNode => {
         const text = textNode.nodeValue;
-        const regex = new RegExp(`(${escapeRegExp(keyword)})`, 'gi');
+        const localRegex = new RegExp(`\\b${escapeRegExp(keyword)}\\b`, 'gi');
         const fragment = document.createDocumentFragment();
-        
+
         let lastIndex = 0;
-        text.replace(regex, (match, p1, offset) => {
-          fragment.appendChild(document.createTextNode(text.slice(lastIndex, offset)));
-          
+        let match;
+        while ((match = localRegex.exec(text)) !== null) {
+          fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
           const mark = document.createElement('mark');
           mark.className = 'search-highlight';
-          mark.textContent = match;
+          mark.textContent = match[0];
           fragment.appendChild(mark);
           searchMatches.push(mark);
-          
-          lastIndex = offset + match.length;
-        });
-        
+          lastIndex = match.index + match[0].length;
+        }
+
         fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
         textNode.parentNode.replaceChild(fragment, textNode);
       });
@@ -2644,19 +2874,30 @@ input.slider-value-display[type=number] {
       }
     }
 
-    searchPrevBtn.addEventListener('click', () => {
-      if (searchMatches.length === 0) return;
-      currentMatchIndex = (currentMatchIndex - 1 + searchMatches.length) % searchMatches.length;
-      updateSearchNavigator();
-      highlightCurrentMatch();
-    });
+    function shakeNavigator() {
+  searchNavigator.classList.remove('shake');
+  void searchNavigator.offsetWidth;
+  searchNavigator.classList.add('shake');
+  searchNavigator.addEventListener('animationend', () => {
+    searchNavigator.classList.remove('shake');
+  }, { once: true });
+}
 
-    searchNextBtn.addEventListener('click', () => {
-      if (searchMatches.length === 0) return;
-      currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length;
-      updateSearchNavigator();
-      highlightCurrentMatch();
-    });
+searchPrevBtn.addEventListener('click', () => {
+  if (searchMatches.length === 0) return;
+  if (currentMatchIndex <= 0) { shakeNavigator(); return; }
+  currentMatchIndex -= 1;
+  updateSearchNavigator();
+  highlightCurrentMatch();
+});
+
+searchNextBtn.addEventListener('click', () => {
+  if (searchMatches.length === 0) return;
+  if (currentMatchIndex >= searchMatches.length - 1) { shakeNavigator(); return; }
+  currentMatchIndex += 1;
+  updateSearchNavigator();
+  highlightCurrentMatch();
+});
 
     // Initialize the app down here so all search variables exist first!
     setActiveChat(-1);
@@ -2704,18 +2945,21 @@ function startRotatingText() {
 function renderSidebarList() {
   const chatList = document.querySelector(".chat-list");
   
-  // Re-build the sidebar HTML based on the conversations array
-  chatList.innerHTML = conversations.map((conv, index) => `
-    <button class="chat-item ${index === currentChatIndex ? 'active' : ''}" type="button" data-chat-index="${index}" aria-pressed="${index === currentChatIndex}">
-      <span class="chat-icon">✦</span>
-      <span class="chat-copy">
-        <strong>${conv.title}</strong>
-        <span>${conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].text.substring(0, 25) + '...' : 'New chat'}</span>
-      </span>
-    </button>
-  `).join("");
+  chatList.innerHTML = conversations.map((conv, index) => {
+    const lastMessage = conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].text : "New chat";
+    const preview = lastMessage.length > 25 ? `${lastMessage.substring(0, 25)}...` : lastMessage;
 
-  // Re-bind click events to the new buttons
+    return `
+      <button class="chat-item ${index === currentChatIndex ? 'active' : ''}" type="button" data-chat-index="${index}" aria-pressed="${index === currentChatIndex}">
+        <span class="chat-icon">✦</span>
+        <span class="chat-copy">
+          <strong>${escapeHTML(conv.title)}</strong>
+          <span>${escapeHTML(preview)}</span>
+        </span>
+      </button>
+    `;
+  }).join("");
+
   const newChatButtons = document.querySelectorAll(".chat-item[data-chat-index]");
   newChatButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -2729,23 +2973,137 @@ function renderSidebarList() {
 const chatInput = document.querySelector(".composer-row input");
 const sendBtn = document.querySelector(".send-button");
 
-function appendMessage(messageObj) {
+function appendMessage(messageObj, shouldScroll = true) {
   if (messages.classList.contains("start-mode")) {
     clearInterval(rotateInterval);
     messages.classList.remove("start-mode");
     messages.innerHTML = '<div class="date-label">Today</div>';
   }
+
   messages.insertAdjacentHTML("beforeend", createMessage(messageObj));
-  scrollMessagesToBottom("auto");
+
+  if (shouldScroll) {
+    scrollMessagesToBottom("auto");
+  }
+
+  return messages.lastElementChild;
 }
 
-function buildConversationHistory(messagesList, pendingBotId) {
+function buildConversationHistory(messagesList) {
   return messagesList
-    .filter(msg => msg && msg.text && msg.id !== pendingBotId && msg.text !== "Spark is thinking...")
+    .filter(msg => msg && msg.text)
     .map(msg => ({
       role: msg.who === "user" ? "user" : "assistant",
       content: msg.text
     }));
+}
+
+function showThinkingIndicator() {
+  hideThinkingIndicator();
+  messages.insertAdjacentHTML("beforeend", `
+    <div class="thinking-row" id="sparkThinkingIndicator" aria-label="Spark is thinking">
+      <div class="avatar bot">AI</div>
+      <div class="thinking-card" aria-hidden="true">
+        <span class="thinking-dot"></span>
+        <span class="thinking-dot"></span>
+        <span class="thinking-dot"></span>
+      </div>
+    </div>
+  `);
+  scrollMessagesToBottom("smooth");
+}
+
+function hideThinkingIndicator() {
+  const indicator = document.getElementById("sparkThinkingIndicator");
+  if (indicator) indicator.remove();
+}
+
+function setSendingState(isSending) {
+  sendBtn.classList.toggle("loading", isSending);
+  sendBtn.disabled = isSending;
+  sendBtn.textContent = isSending ? "" : "➜";
+  chatInput.disabled = isSending;
+  messages.setAttribute("aria-busy", String(isSending));
+}
+
+function typeTextInto(element, text) {
+  const fullText = String(text || "").trim();
+
+  if (!element) return Promise.resolve();
+
+  element.textContent = "";
+  element.classList.add("typing");
+
+  if (!fullText || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    element.textContent = fullText;
+    element.classList.remove("typing");
+    scrollMessagesToBottom("auto");
+    return Promise.resolve();
+  }
+
+  const tokens = fullText.match(/\S+\s*/g) || [fullText];
+  let index = 0;
+
+  return new Promise((resolve) => {
+    function typeNextToken() {
+      const shouldStickToBottom = isMessagesNearBottom();
+      const token = tokens[index] || "";
+
+      element.textContent += token;
+      index += 1;
+
+      if (shouldStickToBottom) {
+        scrollMessagesToBottom("auto");
+      }
+
+      if (index < tokens.length) {
+        const delay = Math.min(54, Math.max(18, token.length * 7));
+        window.setTimeout(typeNextToken, delay);
+      } else {
+        element.classList.remove("typing");
+        scrollMessagesToBottom("auto");
+        resolve();
+      }
+    }
+
+    typeNextToken();
+  });
+}
+
+function appendBotMessage(text, messageId, timeStr, targetConversation) {
+  const finalText = String(text || "Spark replied, but the response came back empty. Try sending that once more.").trim();
+  const botMsg = {
+    who: "bot",
+    name: "AI",
+    text: "",
+    meta: "AI • Just now",
+    id: messageId,
+    bubbleId: `bubble-${messageId}`,
+    realTime: `AI • ${timeStr}`
+  };
+
+  targetConversation.messages.push(botMsg);
+  hideThinkingIndicator();
+
+  if (conversations[currentChatIndex] !== targetConversation) {
+    botMsg.text = finalText;
+    renderSidebarList();
+    return Promise.resolve();
+  }
+
+  appendMessage(botMsg);
+  const bubbleElement = document.getElementById(botMsg.bubbleId);
+
+  return typeTextInto(bubbleElement, finalText).then(() => {
+    botMsg.text = finalText;
+    renderSidebarList();
+
+    window.setTimeout(() => {
+      botMsg.meta = botMsg.realTime;
+      const metaElement = document.getElementById(messageId);
+      if (metaElement) metaElement.textContent = botMsg.realTime;
+    }, 60000);
+  });
 }
 
 function getSparkApiUrl() {
@@ -2767,9 +3125,10 @@ function resetSparkApiUrl() {
 
 function handleSendMessage() {
   const text = chatInput.value.trim();
-  if (!text) return; 
+  if (!text || chatInput.disabled) return;
 
-  chatInput.value = ""; 
+  setSendingState(true);
+  chatInput.value = "";
 
   if (currentChatIndex === -1) {
     startScreenDraft = "";
@@ -2777,79 +3136,52 @@ function handleSendMessage() {
     conversations[currentChatIndex].draft = "";
   }
 
-  // --- NEW: Grab the current real time ---
   const now = new Date();
   const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-
-  // --- NEW: Create unique IDs for the timestamps ---
   const userMsgId = "msg-user-" + Date.now();
   const botMsgId = "msg-bot-" + Date.now();
 
-  // Create the objects, storing both "Just now" and the "Real Time"
   const userMsg = { 
     who: "user", 
     name: "You", 
-    text: text, 
+    text, 
     meta: "You • Just now", 
     id: userMsgId,
     realTime: `You • ${timeStr}`
   };
-  
-  const botMsg = { 
-    who: "bot", 
-    name: "AI", 
-    text: "AI has not been integrated into me yet", 
-    meta: "AI • Just now", 
-    id: botMsgId,
-    realTime: `AI • ${timeStr}`
-  };
 
-  // Check if this is a brand new chat (Start screen)
   if (currentChatIndex === -1) {
-    // Grab the first 5 words for the title
     const words = text.split(/\s+/);
     const generatedTitle = words.slice(0, 5).join(" ") + (words.length > 5 ? "..." : "");
 
-    // Create the new conversation object
-    const newConv = {
+    conversations.unshift({
       title: generatedTitle,
       messages: []
-    };
+    });
 
-    // Add it to the top of our array
-    conversations.unshift(newConv);
     currentChatIndex = 0;
-    
-    // Update the UI
     renderSidebarList();
     setActiveChat(currentChatIndex);
     conversationTitle.textContent = generatedTitle;
     fitConversationTitle();
-  } else {
-    // If it's an existing chat, move it to the top of the list!
-    if (currentChatIndex > 0) {
-      const activeConv = conversations.splice(currentChatIndex, 1)[0];
-      conversations.unshift(activeConv);
-      currentChatIndex = 0; 
-    }
+  } else if (currentChatIndex > 0) {
+    const activeConv = conversations.splice(currentChatIndex, 1)[0];
+    conversations.unshift(activeConv);
+    currentChatIndex = 0;
   }
 
-  // 1. Show and save the user's message
+  const targetConversation = conversations[currentChatIndex];
+
   appendMessage(userMsg);
-  conversations[currentChatIndex].messages.push(userMsg);
-  
-  // Re-render sidebar immediately to show user text preview and new order
-  renderSidebarList(); 
+  targetConversation.messages.push(userMsg);
+  renderSidebarList();
 
-  // --- NEW: 60-Second Timer for User Message ---
-  setTimeout(() => {
-    userMsg.meta = userMsg.realTime; // Update data layer
+  window.setTimeout(() => {
+    userMsg.meta = userMsg.realTime;
     const el = document.getElementById(userMsgId);
-    if (el) el.textContent = userMsg.realTime; // Update visual layer
-  }, 60000); 
+    if (el) el.textContent = userMsg.realTime;
+  }, 60000);
 
-  // --- LIVE API CONNECTION TO COLAB ---
-  
   // 1. Map the UI personality to the exact System Prompt Spark learned during training
   const systemPrompts = {
     "gentle_crisis_listener": "You are Spark, a mental health companion. Your personality is The Safe Haven. You prioritize emotional safety above everything. Never pressure the user. Never give unsolicited advice. Speak softly and slowly. Your only job is to make the user feel safe and heard. If the user is in severe distress, gently suggest talking to someone close to them or a helpline.",
@@ -2866,27 +3198,17 @@ function handleSendMessage() {
     "socratic_guide": "You are Spark, a mental health companion. Your personality is The Socratic Guide. You help users find their own answers through thoughtful questions. You never tell them what to do. You guide them to their own conclusions. You are curious, calm, and patient. If the user is in severe distress, suggest someone close to them or a helpline."
   };
 
-  // 2. Put a temporary "Spark is typing..." message in the UI
-  botMsg.text = "Spark is thinking...";
-  appendMessage(botMsg);
-  conversations[currentChatIndex].messages.push(botMsg);
-  renderSidebarList();
-
-  // 3. Send the message to your Colab Spark server
+  const basePersonality = systemPrompts[finalAIPersonality] || systemPrompts["supportive_guide"];
+  const userProfile = `\n\nUSER CONTEXT: The user is ${userAge} years old. Their current psychological profile and life situation includes these traits: ${userTraits.join(", ")}. Keep this user context in mind at all times to deeply personalize your advice and tone.`;
+  const combinedSystemPrompt = basePersonality + userProfile;
+  const conversationHistory = buildConversationHistory(targetConversation.messages);
   const SPARK_API_URL = getSparkApiUrl();
 
-  // --- NEW: Give Spark the User's Profile! ---
-  // We take Spark's base personality...
-  const basePersonality = systemPrompts[finalAIPersonality] || systemPrompts["supportive_guide"];
-  
-  // ...and stitch it together with the exact age and traits the user just selected!
-  const userProfile = `\n\nUSER CONTEXT: The user is ${userAge} years old. Their current psychological profile and life situation includes these traits: ${userTraits.join(", ")}. Keep this user context in mind at all times to deeply personalize your advice and tone.`;
-  
-  const combinedSystemPrompt = basePersonality + userProfile;
-  const conversationHistory = buildConversationHistory(conversations[currentChatIndex].messages, botMsgId);
+  showThinkingIndicator();
 
   if (!SPARK_API_URL) {
-    document.getElementById(botMsgId).parentElement.querySelector('.bubble').textContent = "Paste your Colab tunnel URL first, then send again.";
+    appendBotMessage("Paste your Colab tunnel URL first, then send again.", botMsgId, timeStr, targetConversation)
+      .finally(() => setSendingState(false));
     return;
   }
 
@@ -2899,22 +3221,24 @@ function handleSendMessage() {
       conversation_history: conversationHistory
     })
   })
-  .then(response => response.json())
-  .then(data => {
-    // Replace the "thinking" message with Spark's actual response
-    const bubbleElement = document.getElementById(botMsgId).parentElement.querySelector('.bubble');
-    bubbleElement.textContent = data.response;
-    
-    // Update our saved conversation history
-    const lastMsg = conversations[currentChatIndex].messages;
-    lastMsg[lastMsg.length - 1].text = data.response;
-    scrollMessagesToBottom("auto");
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Spark server returned ${response.status}`);
+    }
+    return response.json();
   })
+  .then(data => appendBotMessage(data.response, botMsgId, timeStr, targetConversation))
   .catch(error => {
     console.error("Error communicating with Colab Spark server:", error);
     resetSparkApiUrl();
-    document.getElementById(botMsgId).parentElement.querySelector('.bubble').textContent = "Spark could not reach Colab. Start the Colab server again and paste the new tunnel URL.";
-    updateJumpBottomButton();
+    return appendBotMessage("Spark could not reach Colab. Start the Colab server again and paste the new tunnel URL.", botMsgId, timeStr, targetConversation);
+  })
+  .finally(() => {
+    setSendingState(false);
+
+    if (!mobileQuery.matches) {
+      chatInput.focus();
+    }
   });
 }
 
@@ -3401,7 +3725,7 @@ function renderQuestion(questionId) {
     } else if (q.type === "slider") {
       optionsContainer.innerHTML = `
         <div class="slider-container">
-          <input type="number" class="slider-value-display" id="sliderValue" min="${q.min}" max="${q.max}" value="${q.defaultVal}">
+          <input type="text" inputmode="numeric" class="slider-value-display" id="sliderValue" value="${q.defaultVal}">
           <input type="range" min="${q.min}" max="${q.max}" value="${q.defaultVal}" class="custom-slider" id="ageSlider">
           <button class="next-btn" id="sliderNextBtn">Continue</button>
         </div>
@@ -3411,24 +3735,67 @@ function renderQuestion(questionId) {
       const display = document.getElementById('sliderValue');
       const nextBtn = document.getElementById('sliderNextBtn');
 
-      // Update text box when slider moves
+      // Update text box when slider moves (If it hits the max, show "90+")
       slider.addEventListener('input', (e) => {
-        display.value = e.target.value;
+        let val = parseInt(e.target.value, 10);
+        display.value = val >= q.max ? q.max + '+' : val;
       });
 
-      // Update slider when typing in the text box
+      // Update slider & strict character filtering when typing
       display.addEventListener('input', (e) => {
-        let val = parseInt(e.target.value);
-        if (!isNaN(val)) {
-          if (val < q.min) val = q.min;
-          if (val > q.max) val = q.max;
-          slider.value = val;
+        let rawVal = e.target.value;
+        
+        // If it already snapped to "90+", leave it alone
+        if (rawVal === q.max + '+') return;
+
+        // INSTANTLY strip away any letters or symbols (leaving only digits)
+        let numericString = rawVal.replace(/\D/g, '');
+
+        if (numericString === '') {
+          display.value = '';
+          return;
+        }
+
+        let val = parseInt(numericString, 10);
+
+        // Immediate snap if they type a number higher than or equal to the max
+        if (val >= q.max) {
+          display.value = q.max + '+';
+          slider.value = q.max;
+        } else {
+          display.value = val; // Display the clean, letter-free number
+          slider.value = val >= q.min ? val : q.min; // Move slider visually
+        }
+      });
+
+      // Helper function to force minimum limit (10) on blur/enter
+      const applyClamping = () => {
+        if (display.value === q.max + '+') return;
+
+        let val = parseInt(display.value.replace(/\D/g, ''), 10);
+        // If they left it blank or typed something lower than min, snap to min
+        if (isNaN(val) || val < q.min) {
+          display.value = q.min;
+          slider.value = q.min;
+        }
+      };
+
+      // Auto-reset low numbers when clicking outside the box
+      display.addEventListener('blur', applyClamping);
+
+      // Auto-reset low numbers when pressing Enter
+      display.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applyClamping();
         }
       });
 
       nextBtn.addEventListener('click', () => {
+        applyClamping(); // One final check just in case!
+        
         userAge = parseInt(slider.value) || 0;
-        const ageTrait = `age_${userAge}`;
+        const ageTrait = "age_" + userAge;
         
         historyStack.push({ id: currentQId, traits: [ageTrait] });
         userTraits.push(ageTrait); 
